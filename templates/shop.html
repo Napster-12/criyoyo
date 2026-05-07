@@ -34,44 +34,77 @@ body{
 }
 
 /* NAVBAR */
+.navbar{
+    background:#000;
+    border-bottom:1px solid #111;
+    position:sticky;
+    top:0;
+    z-index:999;
+}
+
 .nav{
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:15px 0;
-    border-bottom:1px solid #111;
-    background:#000;
-    gap:20px;
-    flex-wrap:wrap;
 }
 
+/* LOGO */
 .logo{
-    font-weight:700;
     font-size:1.5rem;
+    font-weight:700;
     color:#00ff88;
     text-decoration:none;
 }
 
+/* LINKS (DESKTOP) */
 .nav-links{
     display:flex;
     gap:20px;
 }
 
 .nav-links a{
-    text-decoration:none;
     color:#fff;
+    text-decoration:none;
     font-size:0.95rem;
-    transition:0.3s;
 }
 
 .nav-links a:hover{
     color:#00ff88;
 }
 
+/* CART */
 .cart{
     color:#00ff88;
     text-decoration:none;
     font-weight:600;
+}
+
+/* HAMBURGER */
+.hamburger{
+    display:none;
+    font-size:1.8rem;
+    cursor:pointer;
+    color:#00ff88;
+}
+
+/* MOBILE MENU */
+.mobile-menu{
+    display:none;
+    flex-direction:column;
+    gap:15px;
+    padding:15px 0;
+    border-top:1px solid #111;
+}
+
+.mobile-menu a{
+    color:#fff;
+    text-decoration:none;
+    font-size:1.1rem;
+}
+
+.mobile-menu a:hover{
+    color:#00ff88;
 }
 
 /* HEADER */
@@ -141,29 +174,22 @@ body{
     border-radius:6px;
     font-weight:600;
     cursor:pointer;
-    transition:0.3s;
-}
-
-.btn:hover{
-    background:#00cc6a;
 }
 
 /* MOBILE */
 @media screen and (max-width:768px){
 
-    .nav{
-        flex-direction:column;
-        align-items:flex-start;
+    .nav-links,
+    .cart{
+        display:none;
     }
 
-    .nav-links{
-        flex-direction:column;
-        width:100%;
-        gap:10px;
+    .hamburger{
+        display:block;
     }
 
-    .nav-links a{
-        padding:5px 0;
+    .mobile-menu.active{
+        display:flex;
     }
 
     .header h1{
@@ -174,6 +200,9 @@ body{
         grid-template-columns:1fr;
     }
 
+    .card img{
+        height:200px;
+    }
 }
 
 </style>
@@ -182,18 +211,36 @@ body{
 <body>
 
 <!-- NAVBAR -->
-<div class="container nav">
+<div class="navbar">
+    <div class="container nav">
 
-    <div class="logo">CRIYOYO</div>
+        <a href="/" class="logo">CRIYOYO</a>
 
-    <div class="nav-links">
+        <!-- DESKTOP LINKS -->
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/contact">Contact</a>
+            <a href="#">Collections</a>
+        </div>
+
+        <a href="/cart" class="cart">🛒 Cart</a>
+
+        <!-- HAMBURGER -->
+        <div class="hamburger" onclick="toggleMenu()">
+            ☰
+        </div>
+
+    </div>
+
+    <!-- MOBILE MENU -->
+    <div class="container mobile-menu" id="mobileMenu">
         <a href="/">Home</a>
         <a href="/shop">Shop</a>
         <a href="/contact">Contact</a>
         <a href="#">Collections</a>
+        <a href="/cart">🛒 Cart</a>
     </div>
-
-    <a href="/cart" class="cart">🛒 Cart</a>
 
 </div>
 
@@ -221,14 +268,10 @@ body{
 
                 <h3>{{ product.name }}</h3>
 
-                <div class="price">
-                    R{{ product.price }}
-                </div>
+                <div class="price">R{{ product.price }}</div>
 
                 <a href="/add_to_cart/{{ product.id }}">
-                    <button class="btn">
-                        Add to Cart
-                    </button>
+                    <button class="btn">Add to Cart</button>
                 </a>
 
             </div>
@@ -240,6 +283,13 @@ body{
     </div>
 
 </div>
+
+<!-- SCRIPT -->
+<script>
+function toggleMenu(){
+    document.getElementById("mobileMenu").classList.toggle("active");
+}
+</script>
 
 </body>
 </html>
