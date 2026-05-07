@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Settings - Criyoyo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff}
+        .container{max-width:800px;margin:auto;padding:20px}
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #111;background:#000}
+        .logo{font-weight:700;font-size:1.5rem;color:#00ff88;text-decoration:none}
+        .nav-links{display:flex;gap:20px;font-size:0.9rem}
+        .nav-links a{text-decoration:none;color:#fff}
+        @media(max-width:768px){.nav-links{display:none}}
+
+        .card{background:#0a0a0a;border:1px solid #333;border-radius:10px;padding:25px;margin-bottom:20px}
+        .card h1{color:#00ff88;margin-bottom:20px;font-size:1.8rem}
+        .card h2{color:#fff;margin:20px 0 10px;font-size:1.3rem}
+
+        .cookie-item{display:flex;justify-content:space-between;align-items:center;padding:15px;border-bottom:1px solid #222}
+        .cookie-item:last-child{border-bottom:none}
+        .cookie-info h3{font-size:1rem;margin-bottom:5px;color:#fff}
+        .cookie-info p{color:#888;font-size:0.85rem;line-height:1.5}
+
+        .toggle-switch{position:relative;display:inline-block;width:50px;height:24px}
+        .toggle-switch input{opacity:0;width:0;height:0}
+        .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#333;transition:.3s;border-radius:24px}
+        .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%}
+        input:checked+.slider{background:#00ff88}
+        input:checked+.slider:before{transform:translateX(26px)}
+        input:disabled+ .slider{opacity:0.5;cursor:not-allowed}
+
+        .essential-badge{display:inline-block;background:#17a2b8;color:#fff;padding:3px 8px;border-radius:3px;font-size:0.7rem;margin-left:8px}
+
+        .btn-group{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+        .btn{background:#00ff88;color:#000;padding:12px 20px;border:none;border-radius:5px;cursor:pointer;font-weight:600}
+        .btn:hover{background:#00cc6a}
+        .btn-secondary{background:#333;color:#fff}
+        .btn-secondary:hover{background:#444}
+
+        .alert{background:#111;border-left:3px solid #00ff88;padding:15px;margin-bottom:20px;color:#ccc}
+        .back-link{display:inline-flex;align-items:center;margin-top:20px;color:#00ff88;text-decoration:none}
+        .back-link:hover{text-decoration:underline}
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="nav">
+    <a href="/" class="logo">CRIYOYO</a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/cookie-settings">Cookie Settings</a>
+        </div>
+    </nav>
+
+    <!-- COOKIE BANNER -->
+    <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#0a0a0a;border-top:1px solid #00ff88;padding:15px;z-index:1000;box-shadow:0 -2px 10px rgba(0,255,136,0.2)">
+      <div style="max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <p style="flex:1;min-width:250px;font-size:0.9rem;color:#ccc">🍪 We use cookies to improve your experience. By continuing, you accept our use of essential and functional cookies.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button onclick="acceptAll()" style="background:#00ff88;color:#000;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-weight:600;font-size:0.85rem">Accept All</button>
+          <button onclick="rejectAll()" style="background:#333;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:0.85rem">Reject All</button>
+          <a href="/cookie-settings" style="background:#222;color:#fff;padding:8px 16px;border-radius:5px;text-decoration:none;font-size:0.85rem;border:1px solid #444">Settings</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    async function acceptAll() {
+      await fetch('/accept-cookies', {method: 'POST'});
+      document.getElementById('cookie-banner').style.display = 'none';
+    }
+    async function rejectAll() {
+      await fetch('/reject-cookies', {method: 'POST'});
+      document.getElementById('cookie-banner').style.display = 'none';
+    }
+
+    // Show banner if no consent yet
+    fetch('/api/cookie-status')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.essential || !('functional' in data)) {
+          document.getElementById('cookie-banner').style.display = 'block';
+        }
+      })
+      .catch(() => {
+        document.getElementById('cookie-banner').style.display = 'block';
+      });
+    </script>
+
+    <div class="container">
+
+    <div class="card">
+        <h1>🍪 Cookie Settings</h1>
+        <p style="color:#888;margin-bottom:20px">
+            We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.
+            Click on the different category headings to learn more about how we use cookies.
+        </p>
+
+        <div class="alert">
+            <strong>Essential cookies</strong> are necessary for the website to function and cannot be disabled.
+            Other cookies can be configured according to your preferences.
+        </div>
+
+        <form method="POST">
+
+            <div class="cookie-item">
+                <div class="cookie-info">
+                    <h3>Essential Cookies <span class="essential-badge">Always On</span></h3>
+                    <p>Required for session management, cart functionality, and basic site operations. These cannot be disabled.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked disabled>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="cookie-item">
+                <div class="cookie-info">
+                    <h3>Functional Cookies</h3>
+                    <p>Save your preferences (theme, language), keep items in your cart between visits, and remember your settings.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="functional" value="on"
+                        {% if consent.functional %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="cookie-item">
+                <div class="cookie-info">
+                    <h3>Analytics Cookies</h3>
+                    <p>Help us understand how visitors interact with our website by collecting anonymous statistics.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="analytics" value="on"
+                        {% if consent.analytics %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="cookie-item">
+                <div class="cookie-info">
+                    <h3>Marketing Cookies</h3>
+                    <p>Used to deliver personalized advertisements and track the effectiveness of marketing campaigns.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="marketing" value="on"
+                        {% if consent.marketing %}checked{% endif %}>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn">Save Preferences</button>
+                <a href="/accept-cookies" method="POST" class="btn btn-secondary">Accept All</a>
+                <a href="/reject-cookies" method="POST" class="btn btn-secondary">Reject All</a>
+                <a href="/clear-cookies" class="btn btn-secondary">Clear All Cookies</a>
+            </div>
+        </form>
+    </div>
+
+    <a href="/" class="back-link">← Return to Shop</a>
+
+</div>
+
+</body>
+</html>
