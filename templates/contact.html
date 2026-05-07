@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact Us - Criyoyo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff}
+        .container{max-width:1200px;margin:auto;padding:0 20px}
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #111;background:#000}
+        .logo{font-weight:700;font-size:1.5rem;color:#00ff88}
+        .nav-links{display:flex;gap:20px;font-size:0.9rem}
+        .nav-links a{text-decoration:none;color:#fff}
+        .nav-icons{display:flex;gap:15px;font-size:1.2rem;color:#00ff88}
+        @media(max-width:768px){.nav-links{display:none}}
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="container nav">
+  <div class="logo">CRIYOYO</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/shop">Shop</a>
+    <a href="#">Collections</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <a href="/cart">🛒 Cart</a>
+</div>
+
+<div style="max-width:600px;margin:auto;padding:20px">
+
+    <h1>Contact Us</h1>
+    <a href="/" style="color:#00ff88">← Back to Home</a>
+
+    {% if message_sent %}
+        <p style="color:#00ff88;margin-top:20px;">✅ Message sent successfully!</p>
+    {% endif %}
+
+    <form method="POST" style="margin-top:20px">
+
+        <input type="text" name="name" placeholder="Your Name" required
+        style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:5px">
+
+        <input type="email" name="email" placeholder="Your Email" required
+        style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:5px">
+
+        <textarea name="message" placeholder="Your Message" required
+        style="width:100%;padding:12px;height:120px;border:none;border-radius:5px"></textarea>
+
+        <br><br>
+
+        <button type="submit"
+        style="background:#00ff88;color:black;padding:12px;border:none;width:100%;border-radius:5px;font-weight:600">
+            Send Message
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

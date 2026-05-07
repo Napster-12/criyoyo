@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Criyoyo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff}
+        
+        .container{max-width:800px;margin:auto;padding:20px}
+        
+        /* CHECKOUT FORM */
+        .checkout-form{background:#0a0a0a;border:1px solid #00ff88;border-radius:10px;padding:30px;margin-top:30px}
+        .checkout-form h2{text-align:center;margin-bottom:25px;color:#00ff88}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#00ff88}
+        .form-group input,
+        .form-group select,
+        .form-group textarea{
+            width:100%;padding:12px;background:#111;border:1px solid #333;
+            border-radius:5px;color:#fff;font-size:1rem
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus{
+            outline:none;border-color:#00ff88;box-shadow:0 0 5px rgba(0,255,136,0.3)
+        }
+        .size-options{display:flex;gap:15px;margin-top:10px}
+        .size-option{
+            flex:1;padding:12px;background:#111;border:1px solid #333;
+            border-radius:5px;color:#fff;text-align:center;
+            cursor:pointer;transition:0.3s
+        }
+        .size-option:hover{border-color:#00ff88;background:#1a1a1a}
+        .size-option.active{
+            border-color:#00ff88;background:#00ff88;color:#000
+        }
+        .delivery-options{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+        .delivery-option{
+            padding:15px;background:#111;border:1px solid #333;
+            border-radius:5px;color:#fff;cursor:pointer;transition:0.3s
+        }
+        .delivery-option:hover{border-color:#00ff88;background:#1a1a1a}
+        .delivery-option.active{
+            border-color:#00ff88;background:#00ff88;color:#000
+        }
+        .delivery-option input{margin-right:10px}
+        .btn-primary{
+            width:100%;padding:15px;background:#00ff88;color:#000;
+            border:none;border-radius:5px;font-size:1.1rem;
+            font-weight:600;cursor:pointer;transition:0.3s
+        }
+        .btn-primary:hover{background:#00cc6a}
+        .order-summary{background:#0a0a0a;border:1px solid #00ff88;border-radius:10px;padding:20px;margin-top:30px}
+        .order-summary h2{text-align:center;margin-bottom:20px;color:#00ff88}
+        .order-item{
+            display:flex;justify-content:space-between;padding:12px 0;
+            border-bottom:1px solid #222
+        }
+        .order-total{
+            font-size:1.3rem;color:#00ff88;font-weight:700;
+            margin-top:20px;padding-top:15px;border-top:1px solid #333;
+            text-align:right
+        }
+        .back-link{
+            display:inline-block;color:#00ff88;margin-bottom:20px;
+            text-decoration:none
+        }
+        
+        @media(max-width:600px){
+            .size-options{flex-direction:column}
+            .delivery-options{flex-direction:column}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/cart" class="back-link">← Back to Cart</a>
+        
+        <div class="checkout-form">
+            <h2>Checkout</h2>
+            <form method="POST" action="/checkout">
+                <!-- Customer Information -->
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Shipping Address *</label>
+                    <textarea id="address" name="address" rows="3" required placeholder="Street, City, Province, Postal Code"></textarea>
+                </div>
+                
+                <!-- Size Selection (will be populated via JavaScript) -->
+                <div class="form-group">
+                    <label>Size Selection</label>
+                    <div id="size-selection">
+                        <!-- Size options will be dynamically generated here -->
+                    </div>
+                </div>
+                
+                <!-- Delivery Type -->
+                <div class="form-group">
+                    <label>Delivery Type</label>
+                    <div class="delivery-options">
+                        <label class="delivery-option">
+                            <input type="radio" name="delivery_type" value="3-5" checked>
+                            3-5 Business Days (Standard)
+                        </label>
+                        <label class="delivery-option">
+                            <input type="radio" name="delivery_type" value="7-9">
+                            7-9 Business Days (Economy)
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary">Place Order</button>
+            </form>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div id="order-items">
+                <!-- Order items will be dynamically populated here -->
+            </div>
+            <div class="order-total" id="order-total">
+                Total: R0
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get cart items from localStorage or fetch from server
+        // For simplicity, we'll fetch from the cart page data
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch cart items (this would typically come from the server)
+            // For now, we'll simulate with static data or parse from page
+            
+            // In a real implementation, you'd make an AJAX call to get cart data
+            // Since we're using Flask sessions, we'll render this data directly in the template
+            
+            // This is a placeholder - in reality, the Flask template would populate this
+            const cartItems = []; // Will be populated by Flask template
+            
+            // Populate order summary
+            const orderItemsContainer = document.getElementById('order-items');
+            const orderTotalElement = document.getElementById('order-total');
+            
+            let total = 0;
+            
+            if (cartItems.length === 0) {
+                // Try to get data from server-side rendered elements
+                const cartItemsData = document.querySelectorAll('.cart-item-data');
+                if (cartItemsData.length > 0) {
+                    cartItemsData.forEach(item => {
+                        const itemData = JSON.parse(item.dataset.item);
+                        cartItems.push(itemData);
+                    });
+                }
+            }
+            
+            if (cartItems.length > 0) {
+                cartItems.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'order-item';
+                    itemElement.innerHTML = `
+                        <span>${item.name}</span>
+                        <span>R${item.price}</span>
+                    `;
+                    orderItemsContainer.appendChild(itemElement);
+                    total += item.price;
+                });
+                
+                orderTotalElement.textContent = `Total: R${total.toFixed(2)}`;
+            } else {
+                orderItemsContainer.innerHTML = '<p style="text-align:center;color:#888;">No items in cart</p>';
+                orderTotalElement.textContent = 'Total: R0';
+            }
+            
+            // Handle size selection (simplified)
+            const sizeSelection = document.getElementById('size-selection');
+            if (cartItems.length > 0) {
+                cartItems.forEach((item, index) => {
+                    const sizeGroup = document.createElement('div');
+                    sizeGroup.innerHTML = `
+                        <div class="form-group">
+                            <label>${item.name} Size:</label>
+                            <div class="size-options">
+                                <label class="size-option">S</label>
+                                <label class="size-option">M</label>
+                                <label class="size-option">L</label>
+                                <label class="size-option">XL</label>
+                                <label class="size-option">XXL</label>
+                            </div>
+                            <input type="hidden" name="size_${index}" value="M">
+                        </div>
+                    `;
+                    
+                    const sizeOptions = sizeGroup.querySelectorAll('.size-option');
+                    sizeOptions.forEach(option => {
+                        option.addEventListener('click', function() {
+                            sizeOptions.forEach(opt => opt.classList.remove('active'));
+                            this.classList.add('active');
+                            sizeGroup.querySelector('input[type="hidden"]').value = this.textContent;
+                        });
+                        
+                        // Set default active state for M
+                        if (option.textContent === 'M') {
+                            option.classList.add('active');
+                        }
+                    });
+                    
+                    sizeSelection.appendChild(sizeGroup);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

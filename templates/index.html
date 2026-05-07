@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criyoyo Clothing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:#000;color:#fff}
+
+.container{max-width:1200px;margin:auto;padding:0 20px}
+
+/* NAVBAR */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #111;background:#000}
+.logo{font-weight:700;font-size:1.5rem;color:#00ff88}
+.nav-links{display:flex;gap:20px;font-size:0.9rem}
+.nav-links a{text-decoration:none;color:#fff}
+.nav-icons{display:flex;gap:15px;font-size:1.2rem;color:#00ff88}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#000,#001a0f);padding:80px 0;text-align:center}
+.hero h1{font-size:clamp(2rem,5vw,3rem);margin-bottom:10px}
+.hero p{color:#ccc;margin-bottom:20px}
+.btn{background:#00ff88;color:#000;padding:12px 20px;border:none;border-radius:5px;cursor:pointer;font-weight:600}
+.btn:hover{background:#00cc6a}
+
+/* PRODUCTS */
+.section{padding:60px 0}
+.section h2{text-align:center;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:25px}
+.card{border:1px solid #00ff88;border-radius:10px;overflow:hidden;background:#0a0a0a;transition:0.3s}
+.card:hover{box-shadow:0 10px 25px rgba(0,255,136,0.2)}
+.card img{width:100%;height:250px;object-fit:cover}
+.card-body{padding:15px;text-align:left}
+.card h3{font-size:1rem;margin-bottom:5px}
+.price{color:#00ff88;font-weight:600;margin-bottom:10px}
+.add-btn{width:100%;padding:10px;border:none;background:#00ff88;color:#000;border-radius:5px;cursor:pointer}
+
+/* BANNER */
+.banner{background:#00ff88;color:#000;text-align:center;padding:40px 20px}
+.banner h2{margin-bottom:10px}
+
+/* FEATURES */
+.features{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-top:30px}
+.feature{flex:1 1 200px;text-align:center;border:1px solid #00ff88;padding:20px;border-radius:10px;background:#0a0a0a}
+.feature h4{margin-bottom:5px}
+.feature p{color:#aaa;font-size:0.9rem}
+
+/* FOOTER */
+footer{background:#000;color:#888;padding:30px 20px;text-align:center;margin-top:40px;border-top:1px solid #111}
+
+@media(max-width:768px){
+.nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="container nav">
+  <div class="logo">CRIYOYO</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/shop">Shop</a>
+    <a href="#">Collections</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <a href="/cart">🛒 Cart</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <h1>New Season Streetwear</h1>
+    <p>Discover premium fashion designed for your lifestyle</p>
+    <button class="btn">Shop Now</button>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<h2>Featured Products</h2>
+
+<div class="grid">
+{% for product in products %}
+     <div class="card">
+       <img src="{{ product.image }}" style="width:100%; height:250px; object-fit:cover;">
+       <div class="card-body">
+         <h3>{{ product.name }}</h3>
+         <div class="price">R{{ product.price }}</div>
+         <a href="/add_to_cart/{{ product.id }}">
+       <button class="add-btn">Add to Cart</button>
+     </a>
+       </div>
+     </div>
+{% endfor %}
+</div>
+
+<br>
+<a href="/shop">
+  <button class="btn">View All Products</button>
+</a>
+
+<!-- BANNER -->
+<section class="banner">
+  <h2>Free Delivery on Orders Over R1500</h2>
+  <p>Fast & reliable shipping across South Africa</p>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="container">
+    <h2>Why Choose Criyoyo</h2>
+    <div class="features">
+      <div class="feature">
+        <h4>Secure Payments</h4>
+        <p>Safe checkout with trusted gateways</p>
+      </div>
+      <div class="feature">
+        <h4>Fast Delivery</h4>
+        <p>Quick nationwide shipping</p>
+      </div>
+      <div class="feature">
+        <h4>Quality Products</h4>
+        <p>Premium materials & design</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Criyoyo Clothing. All rights reserved.
+</footer>
+
+</body>
+</html>

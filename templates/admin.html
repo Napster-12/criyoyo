@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Criyoyo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff;line-height:1.6}
+        
+        /* NAVBAR */
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;border-bottom:1px solid #111;background:#000}
+        .logo{font-weight:700;font-size:1.5rem;color:#00ff88;text-decoration:none}
+        .nav-links{display:flex;gap:20px;font-size:0.9rem}
+        .nav-links a{text-decoration:none;color:#fff}
+        .nav-links a:hover{color:#00ff88}
+        
+        .container{max-width:1200px;margin:auto;padding:20px}
+        
+        /* SECTIONS */
+        .section{background:#0a0a0a;border:1px solid #333;border-radius:10px;padding:30px;margin-bottom:30px}
+        .section h1{color:#00ff88;margin-bottom:20px;font-size:1.8rem}
+        .section h2{color:#fff;margin:25px 0 15px;font-size:1.3rem}
+        
+        /* FORM STYLES */
+        input[type="text"], input[type="file"]{
+            width:100%;padding:12px;margin-bottom:10px;background:#111;border:1px solid #333;
+            color:#fff;border-radius:5px;font-size:1rem
+        }
+        input[type="text"]:focus{outline:1px solid #00ff88;border-color:#00ff88}
+        button{
+            background:#00ff88;color:#000;padding:12px 24px;border:none;border-radius:5px;
+            cursor:pointer;font-weight:600;font-size:0.9rem;transition:0.3s
+        }
+        button:hover{background:#00cc6a}
+        
+        /* PRODUCT LIST */
+        .products-list{list-style:none;margin-top:15px}
+        .products-list li{
+            background:#111;padding:12px;margin-bottom:8px;border-radius:5px;
+            border-left:3px solid #00ff88;display:flex;justify-content:space-between
+        }
+        
+        /* ORDER CARDS */
+        .orders-list{display:flex;flex-direction:column;gap:15px}
+        .order-card{
+            background:#111;border:1px solid #333;border-left:4px solid #00ff88;
+            border-radius:8px;padding:20px;transition:0.3s
+        }
+        .order-card:hover{box-shadow:0 4px 15px rgba(0,255,136,0.15);border-color:#00ff88}
+        .order-header{
+            display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px
+        }
+        .order-id{font-weight:700;color:#00ff88;font-size:1.1rem}
+        .order-meta{color:#888;font-size:0.9rem;margin-bottom:12px}
+        .order-meta strong{color:#ccc}
+        .order-items ul{list-style:none;margin:10px 0}
+        .order-items li{
+            padding:6px 0;border-bottom:1px solid #222;color:#ccc;display:flex;justify-content:space-between
+        }
+        .order-items li:last-child{border-bottom:none}
+        .order-total{
+            margin-top:15px;font-size:1.2rem;font-weight:700;color:#00ff88;
+            text-align:right;padding-top:10px;border-top:1px solid #333
+        }
+        
+        /* STATUS BADGES */
+        .status{display:inline-block;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+        .status-placed{background:#17a2b8;color:#fff}           /* order placed - cyan */
+        .status-received{background:#ffc107;color:#000}        /* payment received - yellow */
+        .status-out{background:#fd7e14;color:#fff}             /* out for delivery - orange */
+        .status-delivered{background:#28a745;color:#fff}       /* delivered - green */
+        
+        /* STATUS UPDATE FORM */
+        .status-form{
+            display:flex;gap:10px;align-items:center;margin-top:15px;padding-top:15px;border-top:1px solid #333;flex-wrap:wrap
+        }
+        .status-form label{color:#ccc;font-size:0.9rem}
+        .status-form select{
+            padding:8px 12px;background:#111;border:1px solid #00ff88;color:#fff;
+            border-radius:5px;font-size:0.9rem;cursor:pointer;min-width:150px
+        }
+        .status-form select:focus{outline:none;border-color:#00ff88;box-shadow:0 0 5px rgba(0,255,136,0.3)}
+        
+        /* EMPTY STATE */
+        .empty-state{text-align:center;padding:40px;color:#888;font-style:italic}
+        
+        /* RESPONSIVE */
+        @media(max-width:600px){
+            .order-header{flex-direction:column;align-items:flex-start}
+            .status-form{flex-direction:column;align-items:stretch}
+            .status-form select{width:100%}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="nav">
+        <a href="/" class="logo">CRIYOYO</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/contact">Contact</a>
+        </div>
+        <div>
+            <a href="/admin" style="color:#00ff88;text-decoration:none;font-weight:500">← Admin Panel</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- PRODUCT MANAGEMENT SECTION -->
+        <div class="section">
+            <h1>🔧 Product Management</h1>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="text" name="name" placeholder="Product Name" required>
+                <input type="text" name="price" placeholder="Price" required>
+                <input type="file" name="image" required>
+                <button type="submit">Add Product</button>
+            </form>
+
+            <h2>Products</h2>
+            <ul class="products-list">
+            {% for product in products %}
+                <li>
+                    <span>{{ product.name }}</span>
+                    <span style="color:#00ff88;font-weight:600">R{{ product.price }}</span>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+
+        <!-- ORDER MANAGEMENT SECTION -->
+        <div class="section">
+            <h1>📦 Order Management</h1>
+            
+            {% if orders %}
+                <div class="orders-list">
+                {% for order in orders|reverse %}
+                <div class="order-card">
+                    <div class="order-header">
+                        <span class="order-id">Order #{{ order.id }}</span>
+                        <span class="status status-{{ order.status|lower }}">
+                            {{ order.status|title }}
+                        </span>
+                    </div>
+                    
+                    <div class="order-meta">
+                        <strong>Customer:</strong> {{ order.customer_email }}<br>
+                        <strong>Date:</strong> {{ order.created_at }}
+                    </div>
+                    
+                    <div class="order-items">
+                        <strong>Items:</strong>
+                        <ul>
+                        {% for item in order.items %}
+                            <li>
+                                <span>{{ item.name }}</span>
+                                <span style="color:#00ff88">R{{ item.price }}</span>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="order-total">
+                        Total: R{{ order.total }}
+                    </div>
+                    
+                    <form method="POST" action="/admin/order/{{ order.id }}/status" class="status-form">
+                        <label for="status">Update Status:</label>
+                        <select name="status" id="status">
+                            <option value="order placed" {% if order.status == 'order placed' %}selected{% endif %}>Order Placed</option>
+                            <option value="payment received" {% if order.status == 'payment received' %}selected{% endif %}>Payment Received</option>
+                            <option value="out for delivery" {% if order.status == 'out for delivery' %}selected{% endif %}>Out for Delivery</option>
+                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        </select>
+                        <button type="submit">Update Status</button>
+                    </form>
+                </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>No orders yet.</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+</body>
+</html>

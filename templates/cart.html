@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Cart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff}
+        .container{max-width:1200px;margin:auto;padding:0 20px}
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #111;background:#000}
+        .logo{font-weight:700;font-size:1.5rem;color:#00ff88}
+        .nav-links{display:flex;gap:20px;font-size:0.9rem}
+        .nav-links a{text-decoration:none;color:#fff}
+        .nav-icons{display:flex;gap:15px;font-size:1.2rem;color:#00ff88}
+        @media(max-width:768px){.nav-links{display:none}}
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="container nav">
+  <div class="logo">CRIYOYO</div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/shop">Shop</a>
+    <a href="#">Collections</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <a href="/cart">🛒 Cart</a>
+</div>
+
+<div style="max-width:900px;margin:auto;padding:20px">
+
+    <h1>Your Cart</h1>
+    <a href="/shop" style="color:#00ff88">← Continue Shopping</a>
+
+    {% if items %}
+        <div style="margin-top:20px">
+
+        {% for item in items %}
+            <div style="display:flex;align-items:center;margin-bottom:15px;border-bottom:1px solid #333;padding-bottom:10px">
+                
+                <img src="{{ item.image }}" width="80">
+
+                <div style="margin-left:15px">
+                    <h3>{{ item.name }}</h3>
+                    <p style="color:#00ff88">R{{ item.price }}</p>
+                </div>
+
+                <div style="margin-left:auto">
+                    <a href="/remove_from_cart/{{ loop.index0 }}">
+                        <button style="background:red;color:white;border:none;padding:8px">Remove</button>
+                    </a>
+                </div>
+
+            </div>
+        {% endfor %}
+
+        <h2>Total: R{{ total }}</h2>
+
+        <form method="POST" action="/checkout">
+    
+    <input type="email" name="email" placeholder="Enter your email"
+        required
+        style="width:100%;padding:12px;margin-bottom:10px;border:none;background:#111;color:#fff">
+
+    <button style="background:#00ff88;color:black;padding:12px;border:none;width:100%">
+        Checkout
+    </button>
+
+</form>
+
+        </div>
+    {% else %}
+        <p>Your cart is empty</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
