@@ -8,11 +8,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
     font-family:'Inter',sans-serif;
+}
+
+html, body{
+    width:100%;
+    overflow-x:hidden;
 }
 
 body{
@@ -80,29 +86,6 @@ body{
     font-weight:600;
 }
 
-/* MOBILE NAV */
-@media(max-width:768px){
-
-    .nav{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .nav-links{
-        width:100%;
-        justify-content:flex-start;
-        gap:15px;
-    }
-
-    .nav-links a{
-        font-size:0.9rem;
-    }
-
-    .cart-btn{
-        margin-top:5px;
-    }
-}
-
 /* HERO */
 .hero{
     background:linear-gradient(135deg,#000,#001a0f);
@@ -150,7 +133,7 @@ body{
 /* PRODUCTS */
 .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
     gap:25px;
     width:100%;
     max-width:1200px;
@@ -330,6 +313,89 @@ footer{
     color:#fff;
     border:1px solid #444;
 }
+
+/* MOBILE RESPONSIVE */
+@media screen and (max-width:768px){
+
+    body{
+        overflow-x:hidden;
+    }
+
+    .container{
+        padding:0 15px;
+    }
+
+    .nav{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .nav-links{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .nav-links a{
+        width:100%;
+        font-size:1rem;
+        padding:8px 0;
+    }
+
+    .cart-btn{
+        width:100%;
+        text-align:center;
+    }
+
+    .hero{
+        padding:60px 15px;
+    }
+
+    .hero h1{
+        font-size:2rem;
+        line-height:1.2;
+    }
+
+    .hero p{
+        font-size:0.95rem;
+    }
+
+    .section{
+        padding:50px 15px;
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+        padding:0;
+    }
+
+    .card img{
+        height:220px;
+    }
+
+    .features{
+        grid-template-columns:1fr;
+    }
+
+    .cookie-content{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .cookie-buttons{
+        width:100%;
+    }
+
+    .cookie-buttons button,
+    .cookie-buttons a{
+        flex:1;
+        text-align:center;
+    }
+}
+
 </style>
 </head>
 
@@ -358,11 +424,12 @@ footer{
     <div class="cookie-content">
 
         <p>
-            🍪 We use cookies to improve your experience. By continuing,
-            you accept our use of essential and functional cookies.
+            🍪 We use cookies to improve your experience.
+            By continuing, you accept our use of essential and functional cookies.
         </p>
 
         <div class="cookie-buttons">
+
             <button onclick="acceptAll()" class="accept-btn">
                 Accept All
             </button>
@@ -374,6 +441,7 @@ footer{
             <a href="/cookie-settings" class="settings-btn">
                 Settings
             </a>
+
         </div>
 
     </div>
@@ -458,7 +526,9 @@ footer{
 
     <div class="container">
 
-        <h2 class="section-title">Why Choose Criyoyo</h2>
+        <h2 class="section-title">
+            Why Choose Criyoyo
+        </h2>
 
         <div class="features">
 
@@ -491,7 +561,7 @@ footer{
 <!-- SCRIPTS -->
 <script>
 
-async function acceptAll() {
+async function acceptAll(){
 
     await fetch('/accept-cookies', {
         method:'POST'
@@ -500,7 +570,7 @@ async function acceptAll() {
     document.getElementById('cookie-banner').style.display='none';
 }
 
-async function rejectAll() {
+async function rejectAll(){
 
     await fetch('/reject-cookies', {
         method:'POST'
