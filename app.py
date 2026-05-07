@@ -378,8 +378,42 @@ def remove_from_cart(index):
 # CHECKOUT
 # ==============================
 
-@app.route('/checkout', methods=['POST'])
+@app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
+
+    # ==========================
+    # SHOW CHECKOUT PAGE
+    # ==========================
+
+    if request.method == 'GET':
+
+        if 'cart' not in session or len(session['cart']) == 0:
+            return redirect(url_for('cart'))
+
+        cart_items = []
+        total = 0
+
+        for product_id in session.get('cart', []):
+
+            product = next(
+                (p for p in products if p['id'] == product_id),
+                None
+            )
+
+            if product:
+
+                cart_items.append(product)
+                total += product['price']
+
+        return render_template(
+            'checkout.html',
+            items=cart_items,
+            total=total
+        )
+
+    # ==========================
+    # PROCESS ORDER
+    # ==========================
 
     if 'cart' not in session or len(session['cart']) == 0:
         return redirect(url_for('cart'))
@@ -387,10 +421,9 @@ def checkout():
     user_email = request.form.get('email')
 
     if not user_email:
-        return redirect(url_for('cart'))
+        return redirect(url_for('checkout'))
 
     total = 0
-
     order_items = []
 
     for product_id in session.get('cart', []):
@@ -410,17 +443,19 @@ def checkout():
             })
 
     order = {
-        'id': len(orders),
+        'id': len(orders) + 1,
         'customer_email': user_email,
         'items': order_items,
         'total': total,
-        'status': 'order placed',
+        'status': 'Order Placed',
         'created_at': str(datetime.now())
     }
 
     orders.append(order)
 
+    # ==========================
     # EMAIL ADMIN
+    # ==========================
 
     try:
 
@@ -440,6 +475,9 @@ Customer:
 
 Total:
 R{total}
+
+Items:
+{', '.join([item['name'] for item in order_items])}
 """
 
         mail.send(admin_msg)
@@ -447,7 +485,9 @@ R{total}
     except Exception as e:
         print("Admin Email Error:", e)
 
+    # ==========================
     # EMAIL CUSTOMER
+    # ==========================
 
     try:
 
@@ -457,7 +497,7 @@ R{total}
         )
 
         user_msg.body = f"""
-Thank you for your order.
+Thank you for shopping with CRIYOYO.
 
 Order Number:
 {order['id']}
@@ -467,6 +507,8 @@ R{total}
 
 Status:
 {order['status']}
+
+We will notify you when your order ships.
 """
 
         mail.send(user_msg)
@@ -474,12 +516,16 @@ Status:
     except Exception as e:
         print("Customer Email Error:", e)
 
+    # ==========================
     # CLEAR CART
+    # ==========================
 
     session.pop('cart', None)
 
-    return redirect(url_for('shop'))
-
+    return render_template(
+        'success.html',
+        order=order
+    )
 # ==============================
 # CONTACT PAGE
 # ==============================
