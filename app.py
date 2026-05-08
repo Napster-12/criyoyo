@@ -16,6 +16,13 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 
+# ==============================
+# ADMIN AUTH
+# ==============================
+
+ADMIN_EMAIL = "admin@criyoyo.com"
+ADMIN_PASSWORD = "123456"  # change this later
+
 app = Flask(__name__)
 
 # ==============================
@@ -204,6 +211,27 @@ def shop():
         products=products
     )
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    error = None
+
+    if request.method == 'POST':
+
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+
+            session['admin_logged_in'] = True
+
+            return redirect(url_for('admin'))
+
+        else:
+            error = "Invalid admin credentials"
+
+    return render_template('login.html', error=error)
+
 # ==============================
 # ADMIN
 # ==============================
@@ -211,11 +239,16 @@ def shop():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
 
+    # ==========================
+    # AUTH CHECK
+    # ==========================
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
 
         name = request.form.get('name')
         price = request.form.get('price')
-
         image = request.files.get('image')
 
         if not name or not price or not image:
@@ -223,10 +256,7 @@ def admin():
 
         filename = f"{datetime.now().timestamp()}_{secure_filename(image.filename)}"
 
-        filepath = os.path.join(
-            app.config['UPLOAD_FOLDER'],
-            filename
-        )
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
         image.save(filepath)
 
