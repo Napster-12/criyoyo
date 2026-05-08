@@ -1,63 +1,361 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Contact Us - Criyoyo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-        body{background:#000;color:#fff}
-        .container{max-width:1200px;margin:auto;padding:0 20px}
-        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #111;background:#000}
-        .logo{font-weight:700;font-size:1.5rem;color:#00ff88}
-        .nav-links{display:flex;gap:20px;font-size:0.9rem}
-        .nav-links a{text-decoration:none;color:#fff}
-        .nav-icons{display:flex;gap:15px;font-size:1.2rem;color:#00ff88}
-        @media(max-width:768px){.nav-links{display:none}}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Contact Us - Criyoyo</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+html, body{
+    width:100%;
+    overflow-x:hidden;
+}
+
+body{
+    background:#000;
+    color:#fff;
+}
+
+/* CONTAINER */
+.container{
+    width:100%;
+    max-width:1200px;
+    margin:auto;
+    padding:0 20px;
+}
+
+/* NAVBAR */
+.navbar{
+    background:#000;
+    border-bottom:1px solid #111;
+    position:sticky;
+    top:0;
+    z-index:999;
+}
+
+.nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 0;
+}
+
+/* LOGO */
+.logo{
+    font-size:1.5rem;
+    font-weight:700;
+    color:#00ff88;
+    text-decoration:none;
+}
+
+/* DESKTOP LINKS */
+.nav-links{
+    display:flex;
+    gap:20px;
+    align-items:center;
+}
+
+.nav-links a{
+    color:#fff;
+    text-decoration:none;
+    font-size:0.95rem;
+    transition:0.3s;
+}
+
+.nav-links a:hover{
+    color:#00ff88;
+}
+
+/* CART BUTTON */
+.cart-btn{
+    background:#00ff88;
+    color:#000 !important;
+    padding:10px 16px;
+    border-radius:6px;
+    font-weight:600;
+}
+
+/* HAMBURGER */
+.hamburger{
+    display:none;
+    font-size:1.8rem;
+    cursor:pointer;
+    color:#00ff88;
+}
+
+/* MOBILE MENU */
+.mobile-menu{
+    display:none;
+    flex-direction:column;
+    gap:15px;
+    padding:15px 0;
+    border-top:1px solid #111;
+}
+
+.mobile-menu a{
+    color:#fff;
+    text-decoration:none;
+    font-size:1.05rem;
+}
+
+.mobile-menu a:hover{
+    color:#00ff88;
+}
+
+.mobile-menu .cart-btn{
+    width:100%;
+    text-align:center;
+}
+
+/* CONTACT SECTION */
+.contact-section{
+    padding:80px 20px;
+}
+
+.contact-wrapper{
+    max-width:650px;
+    margin:auto;
+    background:#0a0a0a;
+    border:1px solid #111;
+    border-radius:16px;
+    padding:40px;
+}
+
+.contact-wrapper h1{
+    font-size:2.2rem;
+    margin-bottom:10px;
+}
+
+.contact-wrapper p{
+    color:#aaa;
+    margin-bottom:30px;
+    line-height:1.6;
+}
+
+/* SUCCESS MESSAGE */
+.success-message{
+    background:rgba(0,255,136,0.1);
+    border:1px solid #00ff88;
+    color:#00ff88;
+    padding:14px;
+    border-radius:8px;
+    margin-bottom:20px;
+}
+
+/* FORM */
+.form-group{
+    margin-bottom:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-size:0.95rem;
+    color:#ccc;
+}
+
+.form-control{
+    width:100%;
+    padding:14px;
+    border:1px solid #222;
+    background:#111;
+    color:#fff;
+    border-radius:8px;
+    outline:none;
+    transition:0.3s;
+    font-size:0.95rem;
+}
+
+.form-control:focus{
+    border-color:#00ff88;
+}
+
+textarea.form-control{
+    min-height:140px;
+    resize:vertical;
+}
+
+/* BUTTON */
+.submit-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:#00ff88;
+    color:#000;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+    font-size:1rem;
+}
+
+.submit-btn:hover{
+    background:#00cc6a;
+}
+
+/* FOOTER */
+footer{
+    border-top:1px solid #111;
+    padding:30px 20px;
+    text-align:center;
+    color:#777;
+    margin-top:50px;
+}
+
+/* MOBILE */
+@media screen and (max-width:768px){
+
+    .nav-links{
+        display:none;
+    }
+
+    .hamburger{
+        display:block;
+    }
+
+    .mobile-menu.active{
+        display:flex;
+    }
+
+    .contact-section{
+        padding:50px 15px;
+    }
+
+    .contact-wrapper{
+        padding:25px;
+    }
+
+    .contact-wrapper h1{
+        font-size:1.8rem;
+    }
+}
+
+</style>
 </head>
 
 <body>
 
 <!-- NAVBAR -->
-<div class="container nav">
-  <div class="logo">CRIYOYO</div>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/shop">Shop</a>
-    <a href="/contact">Contact</a>
-  </div>
-  <a href="/cart">🛒 Cart</a>
-</div>
+<div class="navbar">
 
-<div style="max-width:600px;margin:auto;padding:20px">
+    <div class="container nav">
 
-    <h1>Contact Us</h1>
+        <a href="/" class="logo">CRIYOYO</a>
 
-    {% if message_sent %}
-        <p style="color:#00ff88;margin-top:20px;">✅ Message sent successfully!</p>
-    {% endif %}
+        <!-- DESKTOP MENU -->
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/contact">Contact</a>
+            <a href="/cart" class="cart-btn">🛒 Cart</a>
+        </div>
 
-    <form method="POST" style="margin-top:20px">
+        <!-- HAMBURGER -->
+        <div class="hamburger" onclick="toggleMenu()">
+            ☰
+        </div>
 
-        <input type="text" name="name" placeholder="Your Name" required
-        style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:5px">
+    </div>
 
-        <input type="email" name="email" placeholder="Your Email" required
-        style="width:100%;padding:12px;margin-bottom:10px;border:none;border-radius:5px">
-
-        <textarea name="message" placeholder="Your Message" required
-        style="width:100%;padding:12px;height:120px;border:none;border-radius:5px"></textarea>
-
-        <br><br>
-
-        <button type="submit"
-        style="background:#00ff88;color:black;padding:12px;border:none;width:100%;border-radius:5px;font-weight:600">
-            Send Message
-        </button>
-
-    </form>
+    <!-- MOBILE MENU -->
+    <div class="container mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        <a href="/cart" class="cart-btn">🛒 Cart</a>
+    </div>
 
 </div>
+
+<!-- CONTACT SECTION -->
+<section class="contact-section">
+
+    <div class="contact-wrapper">
+
+        <h1>Contact Us</h1>
+
+        <p>
+            Have questions about your order, products, or delivery?
+            Send us a message and our team will get back to you soon.
+        </p>
+
+        {% if message_sent %}
+        <div class="success-message">
+            ✅ Message sent successfully!
+        </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="form-group">
+                <label>Your Name</label>
+
+                <input 
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    placeholder="Enter your name"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Your Email</label>
+
+                <input 
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="Enter your email"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Your Message</label>
+
+                <textarea
+                    name="message"
+                    class="form-control"
+                    placeholder="Write your message..."
+                    required
+                ></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Send Message
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+    © 2026 Criyoyo Clothing. All rights reserved.
+</footer>
+
+<!-- SCRIPT -->
+<script>
+
+function toggleMenu(){
+    document.getElementById("mobileMenu").classList.toggle("active");
+}
+
+</script>
 
 </body>
 </html>
