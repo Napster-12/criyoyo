@@ -863,7 +863,7 @@ We will notify you when it ships.
 
     <p>Total: R{grand_total:.2f}</p>
     """
-        ))
+        )
 
     except Exception as e:
         print("CUSTOMER EMAIL ERROR:", e)
