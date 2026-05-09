@@ -1,0 +1,37 @@
+<!-- NAVBAR -->
+<div class="navbar">
+
+    <div class="container nav">
+
+        <a href="/" class="logo">CRIYOYO</a>
+
+        <!-- DESKTOP LINKS -->
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/shop">Shop</a>
+            <a href="/contact">Contact</a>
+            {% if session.get('admin_logged_in') %}
+            <a href="/admin">Admin</a>
+            {% endif %}
+            <a href="/cart" class="cart-btn">🛒 Cart {% if cart_count > 0 %}<span class="cart-count">{{ cart_count }}</span>{% endif %}</a>
+        </div>
+
+        <!-- HAMBURGER -->
+        <div class="hamburger" onclick="toggleMenu()">
+            ☰
+        </div>
+
+    </div>
+
+    <!-- MOBILE MENU -->
+    <div class="container mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
+        <a href="/shop">Shop</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('admin_logged_in') %}
+        <a href="/admin">Admin</a>
+        {% endif %}
+        <a href="/cart" class="cart-btn">🛒 Cart {% if cart_count > 0 %}<span class="cart-count">{{ cart_count }}</span>{% endif %}</a>
+    </div>
+
+</div>

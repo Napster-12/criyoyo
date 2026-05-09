@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order #{{ order.id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#f5f5f5;color:#1a1a1a;padding:40px 20px}
+        .email-container{max-width:600px;margin:auto;background:#ffffff;border:1px solid #e0e0e0;border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+        .email-header{background:#00ff88;color:#000;padding:25px 30px;text-align:center}
+        .email-header h1{margin:0;font-size:1.5rem;font-weight:700}
+        .email-body{padding:30px;background:#ffffff}
+        .order-info{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:20px;margin-bottom:25px}
+        .order-info h2{color:#00a857;margin-bottom:15px;font-size:1.2rem;border-bottom:2px solid #00ff88;padding-bottom:10px}
+        .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+        .info-row:last-child{border-bottom:none}
+        .label{color:#666;font-weight:500}
+        .value{font-weight:600;color:#1a1a1a}
+        .items-section{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:20px;margin-bottom:25px}
+        .items-section h2{color:#00a857;margin-bottom:15px;font-size:1.2rem;border-bottom:2px solid #00ff88;padding-bottom:10px}
+        .item-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+        .item-row:last-child{border-bottom:none}
+        .item-name{flex:1;color:#1a1a1a}
+        .item-price{color:#00a857;font-weight:600}
+        .total-section{background:#f0f9f4;border:2px solid #00ff88;border-radius:10px;padding:20px;margin-top:25px}
+        .total-row{display:flex;justify-content:space-between;padding:8px 0}
+        .total-row:last-child{margin-top:10px;padding-top:15px;border-top:2px solid #00a857;font-size:1.2rem;font-weight:700}
+        .total-row .value{color:#00a857}
+        .delivery-note{margin-top:20px;padding:15px;background:#fff9e6;border-left:4px solid #ffc107;border-radius:6px;color:#333;font-size:0.9rem;line-height:1.5}
+        .footer{text-align:center;padding:20px 30px;color:#888;font-size:0.85rem;border-top:1px solid #e8e8e8;margin-top:20px;background:#f9f9f9}
+        .badge{display:inline-block;background:#00ff88;color:#000;padding:6px 12px;border-radius:20px;font-size:0.8rem;font-weight:600;margin-top:5px}
+        @media(max-width:600px){.email-header{padding:20px}.email-body{padding:20px 15px}}
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>🛍️ New Order Received</h1>
+        </div>
+
+        <div class="email-body">
+            <div class="order-info">
+                <h2>Order Details</h2>
+                <div class="info-row">
+                    <span class="label">Order ID:</span>
+                    <span class="value">#{{ order.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Customer Email:</span>
+                    <span class="value">{{ order.customer_email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Delivery Address:</span>
+                    <span class="value">{{ order.shipping_address }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Delivery Method:</span>
+                    <span class="value">PAXI - {{ '3-5 Business Days (Standard)' if order.delivery_type == '3-5' else '7-9 Business Days (Economy)' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Order Date:</span>
+                    <span class="value">{{ order.created_at[:16].replace('T', ' ') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Status:</span>
+                    <span class="value"><span class="badge">{{ order.status }}</span></span>
+                </div>
+            </div>
+
+            <div class="items-section">
+                <h2>Order Items</h2>
+                {% for item in order['items'] %}
+                <div class="item-row">
+                    <span class="item-name">{{ item.name }} (Size: {{ item.size }})</span>
+                    <span class="item-price">R{{ item.price }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span class="value">R{{ "%.2f"|format(order['subtotal']) }}</span>
+                </div>
+                <div class="total-row">
+                    <span>PAXI Delivery:</span>
+                    <span class="value">R{{ "%.2f"|format(order['delivery_cost']) }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Total:</span>
+                    <span class="value">R{{ "%.2f"|format(order['total']) }}</span>
+                </div>
+                <div class="delivery-note">
+                    <strong>Customer Pick-up Location:</strong><br>
+                    {{ order.shipping_address }}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            This order was placed through CRIYOYO online store.
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,616 +1,1060 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Admin Dashboard - Criyoyo</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Inter',sans-serif;
-}
-
-html, body{
-    width:100%;
-    overflow-x:hidden;
-}
-
-body{
-    background:#000;
-    color:#fff;
-    line-height:1.6;
-}
-
-/* CONTAINER */
-.container{
-    width:100%;
-    max-width:1200px;
-    margin:auto;
-    padding:0 20px;
-}
-
-/* NAVBAR */
-.navbar{
-    background:#000;
-    border-bottom:1px solid #111;
-    position:sticky;
-    top:0;
-    z-index:999;
-}
-
-.nav{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 0;
-}
-
-/* LOGO */
-.logo{
-    font-size:1.5rem;
-    font-weight:700;
-    color:#00ff88;
-    text-decoration:none;
-}
-
-/* DESKTOP LINKS */
-.nav-links{
-    display:flex;
-    gap:20px;
-    align-items:center;
-}
-
-.nav-links a{
-    color:#fff;
-    text-decoration:none;
-    font-size:0.95rem;
-    transition:0.3s;
-}
-
-.nav-links a:hover{
-    color:#00ff88;
-}
-
-/* ADMIN BUTTON */
-.admin-btn{
-    background:#00ff88;
-    color:#000 !important;
-    padding:10px 16px;
-    border-radius:6px;
-    font-weight:600;
-    text-decoration:none;
-}
-
-/* HAMBURGER */
-.hamburger{
-    display:none;
-    font-size:1.8rem;
-    cursor:pointer;
-    color:#00ff88;
-}
-
-/* MOBILE MENU */
-.mobile-menu{
-    display:none;
-    flex-direction:column;
-    gap:15px;
-    padding:15px 0;
-    border-top:1px solid #111;
-}
-
-.mobile-menu a{
-    color:#fff;
-    text-decoration:none;
-    font-size:1.05rem;
-}
-
-.mobile-menu a:hover{
-    color:#00ff88;
-}
-
-.mobile-menu .admin-btn{
-    width:100%;
-    text-align:center;
-}
-
-/* PAGE */
-.page{
-    padding:70px 20px;
-}
-
-/* SECTIONS */
-.section{
-    background:#0a0a0a;
-    border:1px solid #111;
-    border-radius:16px;
-    padding:35px;
-    margin-bottom:35px;
-}
-
-.section h1{
-    color:#00ff88;
-    margin-bottom:20px;
-    font-size:2rem;
-}
-
-.section h2{
-    margin:30px 0 15px;
-    font-size:1.3rem;
-}
-
-/* FORM */
-.form-group{
-    margin-bottom:15px;
-}
-
-input[type="text"],
-input[type="file"]{
-    width:100%;
-    padding:14px;
-    background:#111;
-    border:1px solid #222;
-    color:#fff;
-    border-radius:8px;
-    font-size:0.95rem;
-    outline:none;
-    transition:0.3s;
-}
-
-input[type="text"]:focus,
-input[type="file"]:focus{
-    border-color:#00ff88;
-}
-
-button{
-    background:#00ff88;
-    color:#000;
-    padding:13px 24px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.3s;
-}
-
-button:hover{
-    background:#00cc6a;
-}
-
-/* PRODUCTS */
-.products-list{
-    list-style:none;
-    margin-top:20px;
-}
-
-.products-list li{
-    background:#111;
-    border:1px solid #222;
-    padding:15px;
-    border-radius:10px;
-    margin-bottom:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    transition:0.3s;
-}
-
-.products-list li:hover{
-    border-color:#00ff88;
-}
-
-.product-price{
-    color:#00ff88;
-    font-weight:600;
-}
-
-/* ORDERS */
-.orders-list{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-}
-
-.order-card{
-    background:#111;
-    border:1px solid #222;
-    border-left:4px solid #00ff88;
-    border-radius:14px;
-    padding:25px;
-    transition:0.3s;
-}
-
-.order-card:hover{
-    border-color:#00ff88;
-    box-shadow:0 10px 25px rgba(0,255,136,0.12);
-}
-
-.order-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    flex-wrap:wrap;
-    margin-bottom:15px;
-}
-
-.order-id{
-    color:#00ff88;
-    font-size:1.2rem;
-    font-weight:700;
-}
-
-.order-meta{
-    color:#aaa;
-    margin-bottom:15px;
-    line-height:1.8;
-}
-
-.order-meta strong{
-    color:#fff;
-}
-
-.order-items ul{
-    list-style:none;
-    margin-top:10px;
-}
-
-.order-items li{
-    display:flex;
-    justify-content:space-between;
-    padding:10px 0;
-    border-bottom:1px solid #222;
-    color:#ccc;
-}
-
-.order-items li:last-child{
-    border-bottom:none;
-}
-
-.item-price{
-    color:#00ff88;
-}
-
-.order-total{
-    margin-top:20px;
-    padding-top:15px;
-    border-top:1px solid #222;
-    text-align:right;
-    font-size:1.2rem;
-    font-weight:700;
-    color:#00ff88;
-}
-
-/* STATUS BADGES */
-.status{
-    display:inline-block;
-    padding:8px 16px;
-    border-radius:20px;
-    font-size:0.8rem;
-    font-weight:600;
-    text-transform:uppercase;
-    letter-spacing:0.5px;
-}
-
-.status-order{
-    background:#17a2b8;
-    color:#fff;
-}
-
-.status-payment{
-    background:#ffc107;
-    color:#000;
-}
-
-.status-delivery{
-    background:#fd7e14;
-    color:#fff;
-}
-
-.status-complete{
-    background:#28a745;
-    color:#fff;
-}
-
-/* STATUS FORM */
-.status-form{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    flex-wrap:wrap;
-    margin-top:20px;
-    padding-top:20px;
-    border-top:1px solid #222;
-}
-
-.status-form label{
-    color:#ccc;
-}
-
-.status-form select{
-    padding:10px 14px;
-    background:#111;
-    border:1px solid #00ff88;
-    color:#fff;
-    border-radius:8px;
-    outline:none;
-    min-width:180px;
-}
-
-/* EMPTY */
-.empty-state{
-    text-align:center;
-    padding:50px;
-    color:#777;
-}
-
-/* MOBILE */
-@media screen and (max-width:768px){
-
-    .nav-links{
-        display:none;
-    }
-
-    .hamburger{
-        display:block;
-    }
-
-    .mobile-menu.active{
-        display:flex;
-    }
-
-    .page{
-        padding:50px 15px;
-    }
-
-    .section{
-        padding:25px;
-    }
-
-    .section h1{
-        font-size:1.7rem;
-    }
-
-    .products-list li{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:10px;
-    }
-
-    .order-header{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .status-form{
-        flex-direction:column;
-        align-items:stretch;
-    }
-
-    .status-form select,
-    .status-form button{
-        width:100%;
-    }
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard - Criyoyo</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        html, body{width:100%;overflow-x:hidden}
+        body{background:#0f0f0f;color:#fff;line-height:1.6}
+
+        /* CONTAINER */
+        .container{width:100%;max-width:1400px;margin:auto;padding:0 20px}
+
+        /* NAVBAR */
+        .navbar{
+            background:#000;
+            border-bottom:1px solid #222;
+            position:sticky;
+            top:0;
+            z-index:999;
+            padding:0 20px;
+        }
+
+        .nav{
+            max-width:1400px;
+            margin:auto;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:15px 0;
+        }
+
+        /* LOGO */
+        .logo{
+            font-size:1.5rem;
+            font-weight:700;
+            color:#00ff88;
+            text-decoration:none;
+        }
+
+        /* NAV LINKS */
+        .nav-links{
+            display:flex;
+            gap:20px;
+            align-items:center;
+        }
+
+        .nav-links a{
+            color:#aaa;
+            text-decoration:none;
+            font-size:0.95rem;
+            transition:0.3s;
+        }
+
+        .nav-links a:hover{
+            color:#00ff88;
+        }
+
+        /* LOGOUT BUTTON */
+        .logout-btn{
+            background:#ff3b3b;
+            color:#fff !important;
+            padding:10px 20px;
+            border-radius:6px;
+            font-weight:600;
+            text-decoration:none;
+            transition:0.3s;
+        }
+
+        .logout-btn:hover{
+            background:#e62e2e;
+        }
+
+        /* HAMBURGER */
+        .hamburger{
+            display:none;
+            font-size:1.8rem;
+            cursor:pointer;
+            color:#00ff88;
+        }
+
+        /* MOBILE MENU */
+        .mobile-menu{
+            display:none;
+            flex-direction:column;
+            gap:15px;
+            padding:15px 0;
+            border-top:1px solid #222;
+            background:#000;
+        }
+
+        .mobile-menu a{
+            color:#fff;
+            text-decoration:none;
+            font-size:1.05rem;
+        }
+
+        .mobile-menu a:hover{
+            color:#00ff88;
+        }
+
+        .mobile-menu .logout-btn{
+            width:100%;
+            text-align:center;
+        }
+
+        /* PAGE */
+        .page{
+            padding:40px 20px 70px;
+        }
+
+        /* HEADER */
+        .page-header{
+            margin-bottom:40px;
+        }
+
+        .page-header h1{
+            font-size:2.2rem;
+            margin-bottom:8px;
+            color:#fff;
+        }
+
+        .page-header p{
+            color:#888;
+            font-size:1rem;
+        }
+
+        /* STATS GRID */
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+            gap:18px;
+            margin-bottom:50px;
+        }
+
+        .stat-card{
+            background:#111;
+            border:1px solid #222;
+            border-radius:12px;
+            padding:22px;
+            transition:0.3s;
+            text-align:center;
+        }
+
+        .stat-card:hover{
+            border-color:#00ff88;
+            transform:translateY(-2px);
+            box-shadow:0 8px 20px rgba(0,255,136,0.08);
+        }
+
+        .stat-icon{
+            font-size:2rem;
+            margin-bottom:10px;
+        }
+
+        .stat-label{
+            color:#888;
+            font-size:0.85rem;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+            margin-bottom:6px;
+        }
+
+        .stat-value{
+            font-size:1.8rem;
+            font-weight:700;
+        }
+
+        .stat-card.all-orders .stat-value{color:#00ff88}
+        .stat-card.order-placed .stat-value{color:#17a2b8}
+        .stat-card.payment-received .stat-value{color:#ffc107}
+        .stat-card.out-for-delivery .stat-value{color:#fd7e14}
+        .stat-card.delivered .stat-value{color:#28a745}
+        .stat-card.total-revenue .stat-value{color:#00cc6f}
+        .stat-card.avg-order .stat-value{color:#00aaff}
+
+        /* FILTERS BAR */
+        .filters-bar{
+            background:#111;
+            border:1px solid #222;
+            border-radius:12px;
+            padding:20px;
+            margin-bottom:30px;
+            display:flex;
+            gap:15px;
+            flex-wrap:wrap;
+            align-items:flex-end;
+        }
+
+        .filter-group{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+
+        .filter-group label{
+            color:#888;
+            font-size:0.85rem;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input{
+            padding:10px 14px;
+            background:#0a0a0a;
+            border:1px solid #333;
+            color:#fff;
+            border-radius:8px;
+            outline:none;
+            min-width:180px;
+            font-size:0.95rem;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus{
+            border-color:#00ff88;
+        }
+
+        .filter-group select option{
+            background:#0a0a0a;
+            color:#fff;
+        }
+
+        .filter-btn{
+            padding:10px 24px;
+            background:#00ff88;
+            color:#000;
+            border:none;
+            border-radius:8px;
+            font-weight:600;
+            cursor:pointer;
+            transition:0.3s;
+            height:42px;
+        }
+
+        .filter-btn:hover{
+            background:#00cc6f;
+        }
+
+        .filter-btn.reset{
+            background:#333;
+            color:#fff;
+        }
+
+        .filter-btn.reset:hover{
+            background:#444;
+        }
+
+        /* SECTIONS */
+        .section{
+            background:#111;
+            border:1px solid #222;
+            border-radius:16px;
+            padding:30px;
+            margin-bottom:35px;
+        }
+
+        .section-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:25px;
+            padding-bottom:15px;
+            border-bottom:1px solid #222;
+        }
+
+        .section h2{
+            font-size:1.3rem;
+            color:#fff;
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        /* CHARTS ROW */
+        .charts-row{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(400px, 1fr));
+            gap:25px;
+            margin-bottom:40px;
+        }
+
+        .chart-card{
+            background:#111;
+            border:1px solid #222;
+            border-radius:14px;
+            padding:25px;
+        }
+
+        .chart-card h3{
+            color:#00ff88;
+            margin-bottom:20px;
+            font-size:1.1rem;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .chart-container{
+            position:relative;
+            height:280px;
+        }
+
+        /* PRODUCTS LIST */
+        .products-list{
+            list-style:none;
+            display:grid;
+            gap:12px;
+        }
+
+        .products-list li{
+            background:#0a0a0a;
+            border:1px solid #222;
+            padding:18px 20px;
+            border-radius:10px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            transition:0.3s;
+        }
+
+        .products-list li:hover{
+            border-color:#00ff88;
+            background:#0f0f0f;
+        }
+
+        .product-info{
+            display:flex;
+            align-items:center;
+            gap:15px;
+        }
+
+        .product-name{
+            font-weight:600;
+            font-size:1rem;
+        }
+
+        .product-price{
+            color:#00ff88;
+            font-weight:700;
+            font-size:1.1rem;
+        }
+
+        /* ORDERS LIST */
+        .orders-list{
+            display:flex;
+            flex-direction:column;
+            gap:18px;
+        }
+
+        .order-card{
+            background:#0a0a0a;
+            border:1px solid #222;
+            border-left:4px solid #00ff88;
+            border-radius:12px;
+            padding:25px;
+            transition:0.3s;
+        }
+
+        .order-card:hover{
+            border-color:#00ff88;
+            box-shadow:0 8px 20px rgba(0,255,136,0.08);
+        }
+
+        .order-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:15px;
+            margin-bottom:15px;
+            flex-wrap:wrap;
+        }
+
+        .order-id{
+            color:#00ff88;
+            font-size:1.25rem;
+            font-weight:700;
+        }
+
+        .order-id span{
+            color:#888;
+            font-size:0.9rem;
+            font-weight:400;
+        }
+
+        .order-meta{
+            color:#aaa;
+            margin-bottom:15px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:20px;
+            font-size:0.95rem;
+        }
+
+        .order-meta strong{
+            color:#fff;
+        }
+
+        .order-items{
+            margin:15px 0;
+        }
+
+        .order-items ul{
+            list-style:none;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            margin-top:10px;
+        }
+
+        .order-items li{
+            display:flex;
+            justify-content:space-between;
+            padding:8px 12px;
+            background:#111;
+            border-radius:6px;
+            border:1px solid #1a1a1a;
+        }
+
+        .item-name{
+            color:#ccc;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .item-size{
+            font-size:0.8rem;
+            color:#666;
+            background:#222;
+            padding:2px 8px;
+            border-radius:4px;
+        }
+
+        .item-price{
+            color:#00ff88;
+            font-weight:600;
+        }
+
+        .order-total-section{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-top:15px;
+            padding-top:15px;
+            border-top:1px solid #222;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+
+        .order-total{
+            font-size:1.3rem;
+            font-weight:700;
+            color:#00ff88;
+        }
+
+        .delivery-info{
+            font-size:0.9rem;
+            color:#888;
+            display:flex;
+            align-items:center;
+            gap:5px;
+        }
+
+        .delivery-info strong{
+            color:#00aaff;
+        }
+
+        /* STATUS BADGES */
+        .status-select-wrapper{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        .status-form{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+
+        .status-form select{
+            padding:10px 14px;
+            background:#111;
+            border:1px solid #333;
+            color:#fff;
+            border-radius:8px;
+            outline:none;
+            min-width:180px;
+            cursor:pointer;
+            transition:0.3s;
+        }
+
+        .status-form select:focus{
+            border-color:#00ff88;
+        }
+
+        .status-form select option{
+            background:#111;
+            color:#fff;
+        }
+
+        .status-form button{
+            padding:10px 20px;
+        }
+
+        .status-badge{
+            display:inline-block;
+            padding:6px 14px;
+            border-radius:20px;
+            font-size:0.8rem;
+            font-weight:600;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+        }
+
+        .status-order-placed{background:#17a2b8;color:#fff}
+        .status-payment-received{background:#ffc107;color:#000}
+        .status-out-for-delivery{background:#fd7e14;color:#fff}
+        .status-delivered{background:#28a745;color:#fff}
+
+        /* EMPTY STATE */
+        .empty-state{
+            text-align:center;
+            padding:60px 20px;
+            color:#666;
+        }
+
+        .empty-state p{
+            font-size:1.1rem;
+        }
+
+        /* RESPONSIVE */
+        @media screen and (max-width:768px){
+            .nav-links{
+                display:none;
+            }
+
+            .hamburger{
+                display:block;
+            }
+
+            .mobile-menu.active{
+                display:flex;
+            }
+
+            .page{
+                padding:30px 15px;
+            }
+
+            .page-header h1{
+                font-size:1.8rem;
+            }
+
+            .section{
+                padding:20px;
+            }
+
+            .stat-card{
+                padding:15px;
+            }
+
+            .stat-value{
+                font-size:1.5rem;
+            }
+
+            .filters-bar{
+                flex-direction:column;
+                align-items:stretch;
+            }
+
+            .filter-group select,
+            .filter-group input{
+                width:100%;
+            }
+
+            .filter-btn{
+                width:100%;
+            }
+
+            .charts-row{
+                grid-template-columns:1fr;
+            }
+
+            .order-header{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
+            .status-form{
+                flex-direction:column;
+                align-items:stretch;
+                width:100%;
+            }
+
+            .status-form select,
+            .status-form button{
+                width:100%;
+            }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar{width:8px}
+        ::-webkit-scrollbar-track{background:#111}
+        ::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+        ::-webkit-scrollbar-thumb:hover{background:#00ff88}
+    </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+{% include 'partials/navbar.html' %}
 
-    <div class="container nav">
+    <!-- PAGE -->
+    <div class="container page">
 
-        <a href="/" class="logo">CRIYOYO</a>
-
-        <!-- DESKTOP MENU -->
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/shop">Shop</a>
-            <a href="/contact">Contact</a>
-            <a href="/admin" class="admin-btn">← Admin Panel</a>
+        <!-- HEADER -->
+        <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage your store, products, and orders</p>
         </div>
 
-        <!-- HAMBURGER -->
-        <div class="hamburger" onclick="toggleMenu()">
-            ☰
+        <!-- STATS BY STATUS CARDS -->
+        <div class="stats-grid">
+
+            <div class="stat-card total-revenue">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">
+                    R{{ "%.2f"|format(
+                        orders|sum(attribute='total')
+                    ) if orders else '0.00' }}
+                </div>
+            </div>
+
+            <div class="stat-card all-orders">
+                <div class="stat-icon">📦</div>
+                <div class="stat-label">All Orders</div>
+                <div class="stat-value">{{ orders|length }}</div>
+            </div>
+
+            <div class="stat-card order-placed">
+                <div class="stat-icon">🆕</div>
+                <div class="stat-label">Order Placed</div>
+                <div class="stat-value">
+                    {{ orders|selectattr('status', 'equalto', 'order placed')|list|length }}
+                </div>
+            </div>
+
+            <div class="stat-card payment-received">
+                <div class="stat-icon">💳</div>
+                <div class="stat-label">Payment Received</div>
+                <div class="stat-value">
+                    {{ orders|selectattr('status', 'equalto', 'payment received')|list|length }}
+                </div>
+            </div>
+
+            <div class="stat-card out-for-delivery">
+                <div class="stat-icon">🚚</div>
+                <div class="stat-label">Out for Delivery</div>
+                <div class="stat-value">
+                    {{ orders|selectattr('status', 'equalto', 'out for delivery')|list|length }}
+                </div>
+            </div>
+
+            <div class="stat-card delivered">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Delivered</div>
+                <div class="stat-value">
+                    {{ orders|selectattr('status', 'equalto', 'delivered')|list|length }}
+                </div>
+            </div>
+
+            <div class="stat-card products">
+                <div class="stat-icon">👕</div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value">{{ products|length }}</div>
+            </div>
+
+            <div class="stat-card avg-order">
+                <div class="stat-icon">📈</div>
+                <div class="stat-label">Avg Order Value</div>
+                <div class="stat-value">
+                    R{{ "%.2f"|format(
+                        (orders|sum(attribute='total') / orders|length)
+                    ) if orders else '0.00' }}
+                </div>
+            </div>
+
         </div>
 
-    </div>
-
-    <!-- MOBILE MENU -->
-    <div class="container mobile-menu" id="mobileMenu">
-        <a href="/">Home</a>
-        <a href="/shop">Shop</a>
-        <a href="/contact">Contact</a>
-        <a href="/admin" class="admin-btn">← Admin Panel</a>
-    </div>
-
-</div>
-
-<!-- PAGE -->
-<div class="container page">
-
-    <!-- PRODUCT MANAGEMENT -->
-    <div class="section">
-
-        <h1>🔧 Product Management</h1>
-
-        <form method="POST" enctype="multipart/form-data">
-
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Product Name" required>
+        <!-- FILTERS BAR -->
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>Filter by Status</label>
+                <select id="statusFilter" onchange="applyFilters()">
+                    <option value="all">All Orders</option>
+                    <option value="order placed">Order Placed</option>
+                    <option value="payment received">Payment Received</option>
+                    <option value="out for delivery">Out for Delivery</option>
+                    <option value="delivered">Delivered</option>
+                </select>
             </div>
 
-            <div class="form-group">
-                <input type="text" name="price" placeholder="Price" required>
+            <div class="filter-group">
+                <label>Sort By</label>
+                <select id="sortBy" onchange="applyFilters()">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="highest">Highest Total</option>
+                    <option value="lowest">Lowest Total</option>
+                </select>
             </div>
 
-            <div class="form-group">
-                <input type="file" name="image" required>
-            </div>
+            <button class="filter-btn reset" onclick="resetFilters()">Reset Filters</button>
+        </div>
 
-            <button type="submit">
-                Add Product
-            </button>
+        <!-- CHARTS ROW -->
+        <div class="charts-row">
 
-        </form>
-
-        <h2>Products</h2>
-
-        <ul class="products-list">
-
-            {% for product in products %}
-
-            <li>
-                <span>{{ product.name }}</span>
-
-                <span class="product-price">
-                    R{{ product.price }}
-                </span>
-            </li>
-
-            {% endfor %}
-
-        </ul>
-
-    </div>
-
-    <!-- ORDER MANAGEMENT -->
-    <div class="section">
-
-        <h1>📦 Order Management</h1>
-
-        {% if orders %}
-
-        <div class="orders-list">
-
-            {% for order in orders|reverse %}
-
-            <div class="order-card">
-
-                <div class="order-header">
-
-                    <span class="order-id">
-                        Order #{{ order.id }}
-                    </span>
-
-                    <span class="status">
-                        {{ order.status|title }}
-                    </span>
-
+            <div class="chart-card">
+                <h3>📊 Orders by Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
                 </div>
+            </div>
 
-                <div class="order-meta">
-
-                    <strong>Customer:</strong>
-                    {{ order.customer_email }}
-
-                    <br>
-
-                    <strong>Date:</strong>
-                    {{ order.created_at }}
-
+            <div class="chart-card">
+                <h3>📈 Revenue Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
                 </div>
+            </div>
 
-                <div class="order-items">
+        </div>
 
-                    <strong>Items:</strong>
+        <!-- ORDER MANAGEMENT -->
+        <div class="section">
 
-                    <ul>
+            <div class="section-header">
+                <h2>📋 Orders</h2>
+                <div style="color:#888;font-size:0.9rem;">
+                    Showing <span id="visibleOrdersCount">0</span> of {{ orders|length }} orders
+                </div>
+            </div>
 
-                        {% for item in order.items %}
+            {% if orders %}
 
-                        <li>
+            <div class="orders-list" id="ordersList">
 
-                            <span>{{ item.name }}</span>
+                {% for order in orders|reverse %}
+                <div class="order-card" data-status="{{ order['status'] }}" data-total="{{ order['total'] }}" data-date="{{ order['created_at'] }}">
 
-                            <span class="item-price">
-                                R{{ item.price }}
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">
+                                Order #{{ order['id'] }}
+                            </div>
+                            <div style="color:#888;font-size:0.9rem;margin-top:3px;">
+                                {{ order['created_at'][:19].replace('T', ' ') }}
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                                <div class="order-total">R{{ "%.2f"|format(order['total']) }}</div>
+                                <div class="delivery-info">
+                                    📍 {{ order['shipping_address'][:50] }}{% if order['shipping_address']|length > 50 %}...{% endif %}
+                                </div>
+                            </div>
+                            <span class="status-badge status-{{ order['status'].replace(' ', '-') }}">
+                                {{ order['status']|title }}
                             </span>
+                        </div>
+                    </div>
 
-                        </li>
+                    <div class="order-meta">
+                        <strong>Customer:</strong> {{ order['customer_email'] }}
+                        <span style="margin:0 10px">•</span>
+                        <strong>Delivery:</strong> PAXI {{ '3-5 Days' if order['delivery_type'] == '3-5' else '7-9 Days' }}
+                        <span style="margin:0 10px">•</span>
+                        <strong>Items:</strong> {{ order['items']|length }}
+                    </div>
 
-                        {% endfor %}
+                    <div class="order-items">
+                        <ul>
+                            {% for item in order['items'] %}
+                            <li>
+                                <span class="item-name">
+                                    {{ item.name }}
+                                    <span class="item-size">Size: {{ item.size }}</span>
+                                </span>
+                                <span class="item-price">R{{ item.price }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
 
-                    </ul>
+                    <form method="POST"
+                          action="/admin/order/{{ order['id'] }}/status"
+                          class="status-form">
+
+                        <label style="color:#888;font-size:0.9rem;">Update Status:</label>
+
+                        <select name="status" style="min-width:180px;">
+                            <option value="order placed" {% if order['status'] == 'order placed' %}selected{% endif %}>
+                                📦 Order Placed
+                            </option>
+                            <option value="payment received" {% if order['status'] == 'payment received' %}selected{% endif %}>
+                                💳 Payment Received
+                            </option>
+                            <option value="out for delivery" {% if order['status'] == 'out for delivery' %}selected{% endif %}>
+                                🚚 Out for Delivery
+                            </option>
+                            <option value="delivered" {% if order['status'] == 'delivered' %}selected{% endif %}>
+                                ✅ Delivered
+                            </option>
+                        </select>
+
+                        <button type="submit">Update</button>
+
+                    </form>
 
                 </div>
-
-                <div class="order-total">
-                    Total: R{{ order.total }}
-                </div>
-
-                <form method="POST"
-                      action="/admin/order/{{ order.id }}/status"
-                      class="status-form">
-
-                    <label>Update Status:</label>
-
-                    <select name="status">
-
-                        <option value="order placed"
-                        {% if order.status == 'order placed' %}selected{% endif %}>
-                            Order Placed
-                        </option>
-
-                        <option value="payment received"
-                        {% if order.status == 'payment received' %}selected{% endif %}>
-                            Payment Received
-                        </option>
-
-                        <option value="out for delivery"
-                        {% if order.status == 'out for delivery' %}selected{% endif %}>
-                            Out for Delivery
-                        </option>
-
-                        <option value="delivered"
-                        {% if order.status == 'delivered' %}selected{% endif %}>
-                            Delivered
-                        </option>
-
-                    </select>
-
-                    <button type="submit">
-                        Update Status
-                    </button>
-
-                </form>
+                {% endfor %}
 
             </div>
 
-            {% endfor %}
+            {% else %}
+
+            <div class="empty-state">
+                <p>📭 No orders yet. Orders will appear here.</p>
+            </div>
+
+            {% endif %}
 
         </div>
 
-        {% else %}
+        <!-- PRODUCT MANAGEMENT -->
+        <div class="section">
 
-        <div class="empty-state">
-            <p>No orders yet.</p>
+            <div class="section-header">
+                <h2>👕 Products</h2>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="filter-group" style="display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end;">
+                    <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px;">
+                        <label style="color:#888;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Product Name</label>
+                        <input type="text" name="name" placeholder="Product Name" required>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:6px;flex:0 0 150px;">
+                        <label style="color:#888;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Price (ZAR)</label>
+                        <input type="text" name="price" placeholder="Price" required>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px;">
+                        <label style="color:#888;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.5px;">Image</label>
+                        <input type="file" name="image" required>
+                    </div>
+
+                    <button type="submit" style="flex:0 0 auto;height:42px;padding:10px 24px;">
+                        Add Product
+                    </button>
+                </div>
+
+            </form>
+
+            <h3 style="margin:30px 0 15px;color:#00ff88;font-size:1.1rem;">Current Products</h3>
+
+            <ul class="products-list">
+
+                {% for product in products %}
+                <li>
+                    <div class="product-info">
+                        <span class="product-name">{{ product.name }}</span>
+                    </div>
+                    <span class="product-price">R{{ product.price }}</span>
+                </li>
+                {% endfor %}
+
+            </ul>
+
         </div>
-
-        {% endif %}
 
     </div>
 
-</div>
+    <!-- SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function toggleMenu(){
+            document.getElementById("mobileMenu").classList.toggle("active");
+        }
 
-<!-- SCRIPT -->
-<script>
+        // Prepare data for charts
+        const ordersData = {{ orders|tojson }};
+        
+        // Status breakdown for chart
+        const statusCounts = {
+            'order placed': 0,
+            'payment received': 0,
+            'out for delivery': 0,
+            'delivered': 0
+        };
+        
+        ordersData.forEach(order => {
+            if (statusCounts.hasOwnProperty(order.status)) {
+                statusCounts[order.status]++;
+            }
+        });
 
-function toggleMenu(){
-    document.getElementById("mobileMenu").classList.toggle("active");
-}
+        // Create Status Pie Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Order Placed', 'Payment Received', 'Out for Delivery', 'Delivered'],
+                datasets: [{
+                    data: [
+                        statusCounts['order placed'],
+                        statusCounts['payment received'],
+                        statusCounts['out for delivery'],
+                        statusCounts['delivered']
+                    ],
+                    backgroundColor: [
+                        '#17a2b8',
+                        '#ffc107',
+                        '#fd7e14',
+                        '#28a745'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#aaa',
+                            font: { family: 'Inter', size: 12 },
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
 
-</script>
+        // Revenue over time (by date)
+        const revenueByDate = {};
+        ordersData.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)).forEach(order => {
+            const date = order.created_at.split('T')[0];
+            if (!revenueByDate[date]) revenueByDate[date] = 0;
+            revenueByDate[date] += order.total;
+        });
+
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(revenueByDate),
+                datasets: [{
+                    label: 'Revenue (R)',
+                    data: Object.values(revenueByDate),
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#222' },
+                        ticks: { color: '#888' }
+                    },
+                    y: {
+                        grid: { color: '#222' },
+                        ticks: { color: '#888' }
+                    }
+                }
+            }
+        });
+
+        // Filter functionality
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            const orderCards = document.querySelectorAll('.order-card');
+            let visibleCount = 0;
+            
+            // Filter
+            orderCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                
+                card.style.display = matchesStatus ? 'block' : 'none';
+                
+                if (matchesStatus) visibleCount++;
+            });
+            
+            // Update count
+            document.getElementById('visibleOrdersCount').textContent = visibleCount;
+            
+            // Sort
+            const ordersList = document.getElementById('ordersList');
+            const cardsArray = Array.from(orderCards);
+            
+            cardsArray.sort((a, b) => {
+                const aTotal = parseFloat(a.getAttribute('data-total'));
+                const bTotal = parseFloat(b.getAttribute('data-total'));
+                const aDate = new Date(a.getAttribute('data-date'));
+                const bDate = new Date(b.getAttribute('data-date'));
+                
+                switch(sortBy) {
+                    case 'newest': return bDate - aDate;
+                    case 'oldest': return aDate - bDate;
+                    case 'highest': return bTotal - aTotal;
+                    case 'lowest': return aTotal - bTotal;
+                    default: return bDate - aDate;
+                }
+            });
+            
+            // Re-order DOM
+            cardsArray.forEach(card => ordersList.appendChild(card));
+        }
+
+        function resetFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('sortBy').value = 'newest';
+            applyFilters();
+        }
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | CRIYOYO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#000;color:#fff}
+        .container{max-width:800px;margin:auto;padding:70px 20px;text-align:center}
+        .success-icon{font-size:5rem;color:#00ff88;margin-bottom:30px}
+        .success-title{font-size:2.5rem;margin-bottom:15px}
+        .success-message{color:#888;font-size:1.1rem;margin-bottom:40px;line-height:1.6}
+        .order-details{background:#0a0a0a;border:1px solid #00ff88;border-radius:14px;padding:30px;margin-top:40px;text-align:left}
+        .order-details h2{color:#00ff88;margin-bottom:20px;font-size:1.5rem}
+        .order-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
+        .order-row:last-child{border-bottom:none}
+        .order-label{color:#888}
+        .order-value{font-weight:600}
+        .order-items{margin:20px 0}
+        .order-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #111}
+        .item-name{flex:1}
+        .item-price{color:#00ff88;margin-left:20px}
+        .delivery-note{margin-top:30px;padding:15px;background:#111;border-radius:8px;color:#888;font-size:0.9rem}
+        .btn-primary{display:inline-block;margin-top:30px;padding:15px 40px;background:#00ff88;color:#000;text-decoration:none;border-radius:8px;font-weight:700;transition:0.3s}
+        .btn-primary:hover{background:#00cc6f}
+        @media(max-width:600px){.success-title{font-size:2rem}.order-details{padding:20px}}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✓</div>
+        <h1 class="success-title">Order Confirmed!</h1>
+        <p class="success-message">
+            Thank you for your purchase. We've received your order and will begin processing it shortly.<br>
+            A confirmation email has been sent to <strong>{{ order['customer_email'] }}</strong>
+        </p>
+
+        <div class="order-details">
+            <h2>Order #{{ order['id'] }} Summary</h2>
+
+        <div class="order-items">
+            {% for item in order['items'] %}
+            <div class="order-item">
+                <span class="item-name">{{ item.name }} (Size: {{ item.size }})</span>
+                <span class="item-price">R{{ item.price }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="order-row">
+            <span class="order-label">Subtotal</span>
+            <span class="order-value">R{{ "%.2f"|format(order['subtotal']) }}</span>
+        </div>
+
+        <div class="order-row">
+            <span class="order-label">PAXI Delivery ({{ '3-5 Business Days' if order['delivery_type'] == '3-5' else '7-9 Business Days' }})</span>
+            <span class="order-value">R{{ "%.2f"|format(order['delivery_cost']) }}</span>
+        </div>
+
+        <div class="order-row" style="border-top: 2px solid #333; margin-top: 10px; padding-top: 15px;">
+            <span class="order-label" style="font-size: 1.1rem;">Total</span>
+            <span class="order-value" style="font-size: 1.1rem;">R{{ "%.2f"|format(order['total']) }}</span>
+        </div>
+
+        <div class="order-row">
+            <span class="order-label">Delivery To</span>
+            <span class="order-value">{{ order['shipping_address'] }}</span>
+        </div>
+
+            <div class="delivery-note">
+                <strong>How PAXI Delivery Works:</strong><br>
+                Your order will be delivered to the PEP store or Paxi drop-off point you specified.<br>
+                You'll receive an email with pickup instructions when your order is ready.<br>
+                Please bring your ID and order confirmation when collecting.
+            </div>
+        </div>
+
+        <a href="/" class="btn-primary">Continue Shopping</a>
+    </div>
+</body>
+</html>

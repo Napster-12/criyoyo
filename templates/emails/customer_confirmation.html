@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation #{{ order.id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+        body{background:#f5f5f5;color:#1a1a1a;padding:40px 20px}
+        .email-container{max-width:600px;margin:auto;background:#ffffff;border:1px solid #00ff88;border-radius:14px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+        .email-header{background:#00ff88;color:#000;padding:25px 30px;text-align:center}
+        .email-header h1{margin:0;font-size:1.5rem;font-weight:700}
+        .email-body{padding:30px;background:#ffffff}
+        .thank-you{text-align:center;color:#00a857;font-size:1.1rem;margin-bottom:25px;padding-bottom:20px;border-bottom:2px solid #00ff88}
+        .order-info{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:20px;margin-bottom:25px}
+        .order-info h2{color:#00a857;margin-bottom:15px;font-size:1.2rem;border-bottom:2px solid #00ff88;padding-bottom:10px}
+        .info-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+        .info-row:last-child{border-bottom:none}
+        .label{color:#666;font-weight:500}
+        .value{font-weight:600;color:#1a1a1a}
+        .items-section{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:10px;padding:20px;margin-bottom:25px}
+        .items-section h2{color:#00a857;margin-bottom:15px;font-size:1.2rem;border-bottom:2px solid #00ff88;padding-bottom:10px}
+        .item-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+        .item-row:last-child{border-bottom:none}
+        .item-name{flex:1;color:#1a1a1a}
+        .item-price{color:#00a857;font-weight:600}
+        .total-section{background:#f0f9f4;border:2px solid #00ff88;border-radius:10px;padding:20px}
+        .total-row{display:flex;justify-content:space-between;padding:8px 0}
+        .total-row:last-child{margin-top:10px;padding-top:15px;border-top:2px solid #00a857;font-size:1.2rem;font-weight:700}
+        .total-row .value{color:#00a857}
+        .status-badge{display:inline-block;background:#00ff88;color:#000;padding:8px 16px;border-radius:6px;font-weight:700;margin-top:10px}
+        .delivery-note{margin-top:20px;padding:15px;background:#e3f2fd;border-left:4px solid #2196f3;border-radius:6px;color:#333;font-size:0.9rem;line-height:1.5}
+        .delivery-note strong{color:#1976d2}
+        .cta-button{display:inline-block;margin-top:25px;padding:15px 30px;background:#00ff88;color:#000;text-decoration:none;border-radius:8px;font-weight:700;transition:0.3s}
+        .cta-button:hover{background:#00cc6f}
+        .footer{text-align:center;padding:20px 30px;color:#888;font-size:0.85rem;border-top:1px solid #e8e8e8;margin-top:20px;background:#f9f9f9}
+        .footer a{color:#00a857;text-decoration:none}
+        @media(max-width:600px){.email-header{padding:20px}.email-body{padding:20px 15px}.cta-button{display:block;text-align:center}}
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>✅ Order Confirmed</h1>
+        </div>
+
+        <div class="email-body">
+            <div class="thank-you">
+                Thank you for shopping with <strong>CRIYOYO</strong>!<br>
+                Your order has been successfully placed.
+            </div>
+
+            <div class="order-info">
+                <h2>Order #{{ order.id }}</h2>
+                <div class="info-row">
+                    <span class="label">Order Number:</span>
+                    <span class="value">#{{ order.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Status:</span>
+                    <span class="value"><span class="status-badge">{{ order.status }}</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="label">PAXI Drop-off Point:</span>
+                    <span class="value">{{ order.shipping_address }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Delivery:</span>
+                    <span class="value">{{ '3-5 Business Days (Standard)' if order.delivery_type == '3-5' else '7-9 Business Days (Economy)' }}</span>
+                </div>
+            </div>
+
+            <div class="items-section">
+                <h2>Your Items</h2>
+                {% for item in order['items'] %}
+                <div class="item-row">
+                    <span class="item-name">{{ item.name }} (Size: {{ item.size }})</span>
+                    <span class="item-price">R{{ item.price }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-section">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span class="value">R{{ "%.2f"|format(order['subtotal']) }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Delivery (PAXI):</span>
+                    <span class="value">R{{ "%.2f"|format(order['delivery_cost']) }}</span>
+                </div>
+                <div class="total-row">
+                    <span>Total Paid:</span>
+                    <span class="value">R{{ "%.2f"|format(order['total']) }}</span>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <span class="status-badge">{{ order.status }}</span>
+                </div>
+            </div>
+
+            <div class="delivery-note">
+                <strong>📦 How PAXI Delivery Works:</strong><br><br>
+                1. Your order will be delivered to the PEP store or Paxi drop-off point you specified above.<br>
+                2. You'll receive a notification when your order is ready for collection.<br>
+                3. Please bring your ID and order confirmation when collecting your package.
+            </div>
+
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="/" class="cta-button">Continue Shopping</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:codnellsmall@gmail.com">codnellsmall@gmail.com</a></p>
+            <p>© 2026 Criyoyo Clothing. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

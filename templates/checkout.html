@@ -76,6 +76,8 @@
     </style>
 </head>
 <body>
+
+
     <div class="container">
         <a href="/cart" class="back-link">← Back to Cart</a>
         
@@ -88,10 +90,10 @@
                     <input type="email" id="email" name="email" required>
                 </div>
                 
-                <div class="form-group">
-                    <label for="address">Shipping Address *</label>
-                    <textarea id="address" name="address" rows="3" required placeholder="Street, City, Province, Postal Code"></textarea>
-                </div>
+                 <div class="form-group">
+                     <label for="address">PEP Paxi Drop-off Point Address *</label>
+                     <textarea id="address" name="address" rows="3" required placeholder="Enter the PEP store or Paxi drop-off point address (we deliver to your selected PEP/Paxi location)"></textarea>
+                 </div>
                 
                 <!-- Size Selection (will be populated via JavaScript) -->
                 <div class="form-group">
@@ -103,15 +105,18 @@
                 
                 <!-- Delivery Type -->
                 <div class="form-group">
-                    <label>Delivery Type</label>
+                    <label>PAXI Courier Delivery</label>
+                    <p style="color: #888; font-size: 0.9rem; margin-bottom: 15px;">
+                        We deliver to any PEP store or Paxi drop-off point across South Africa.
+                    </p>
                     <div class="delivery-options">
                         <label class="delivery-option">
                             <input type="radio" name="delivery_type" value="3-5" checked>
-                            3-5 Business Days (Standard)
+                            3-5 Business Days (Standard) - R109.95
                         </label>
                         <label class="delivery-option">
                             <input type="radio" name="delivery_type" value="7-9">
-                            7-9 Business Days (Economy)
+                            7-9 Business Days (Economy) - R59.95
                         </label>
                     </div>
                 </div>
@@ -124,99 +129,97 @@
         <div class="order-summary">
             <h2>Order Summary</h2>
             <div id="order-items">
-                <!-- Order items will be dynamically populated here -->
+                {% for item in items %}
+                <div class="order-item">
+                    <span>{{ item.name }}</span>
+                    <span>R{{ item.price }}</span>
+                </div>
+                {% endfor %}
             </div>
-            <div class="order-total" id="order-total">
-                Total: R0
+            <div class="order-total">
+                Subtotal: R{{ total }}<br>
+                Delivery: R<span id="delivery-cost">0</span><br>
+                <strong>Total: R<span id="grand-total">{{ total }}</span></strong>
             </div>
         </div>
     </div>
 
     <script>
-        // Get cart items from localStorage or fetch from server
-        // For simplicity, we'll fetch from the cart page data
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // Fetch cart items (this would typically come from the server)
-            // For now, we'll simulate with static data or parse from page
-            
-            // In a real implementation, you'd make an AJAX call to get cart data
-            // Since we're using Flask sessions, we'll render this data directly in the template
-            
-            // This is a placeholder - in reality, the Flask template would populate this
-            const cartItems = []; // Will be populated by Flask template
-            
-            // Populate order summary
-            const orderItemsContainer = document.getElementById('order-items');
-            const orderTotalElement = document.getElementById('order-total');
-            
-            let total = 0;
-            
-            if (cartItems.length === 0) {
-                // Try to get data from server-side rendered elements
-                const cartItemsData = document.querySelectorAll('.cart-item-data');
-                if (cartItemsData.length > 0) {
-                    cartItemsData.forEach(item => {
-                        const itemData = JSON.parse(item.dataset.item);
-                        cartItems.push(itemData);
-                    });
-                }
-            }
-            
-            if (cartItems.length > 0) {
-                cartItems.forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'order-item';
-                    itemElement.innerHTML = `
-                        <span>${item.name}</span>
-                        <span>R${item.price}</span>
-                    `;
-                    orderItemsContainer.appendChild(itemElement);
-                    total += item.price;
-                });
-                
-                orderTotalElement.textContent = `Total: R${total.toFixed(2)}`;
-            } else {
-                orderItemsContainer.innerHTML = '<p style="text-align:center;color:#888;">No items in cart</p>';
-                orderTotalElement.textContent = 'Total: R0';
-            }
-            
-            // Handle size selection (simplified)
+            // Delivery pricing
+            const deliveryPrices = {
+                '3-5': 109.95,  // PAXI 3-5 Business Days (Premium)
+                '7-9': 59.95    // PAXI 7-9 Business Days (Economy)
+            };
+
+            const cartItems = [
+                {% for item in items %}
+                {
+                    id: {{ item.id }},
+                    name: "{{ item.name }}",
+                    price: {{ item.price }},
+                    image: "{{ item.image }}"
+                }{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            const subtotal = {{ total }};
+
             const sizeSelection = document.getElementById('size-selection');
-            if (cartItems.length > 0) {
-                cartItems.forEach((item, index) => {
-                    const sizeGroup = document.createElement('div');
-                    sizeGroup.innerHTML = `
-                        <div class="form-group">
-                            <label>${item.name} Size:</label>
-                            <div class="size-options">
-                                <label class="size-option">S</label>
-                                <label class="size-option">M</label>
-                                <label class="size-option">L</label>
-                                <label class="size-option">XL</label>
-                                <label class="size-option">XXL</label>
-                            </div>
-                            <input type="hidden" name="size_${index}" value="M">
+            const deliveryCostSpan = document.getElementById('delivery-cost');
+            const grandTotalSpan = document.getElementById('grand-total');
+
+            // Generate size selection for each item
+            cartItems.forEach((item) => {
+                const sizeGroup = document.createElement('div');
+                sizeGroup.innerHTML = `
+                    <div class="form-group">
+                        <label>${item.name} Size:</label>
+                        <div class="size-options">
+                            <label class="size-option">S</label>
+                            <label class="size-option">M</label>
+                            <label class="size-option">L</label>
+                            <label class="size-option">XL</label>
+                            <label class="size-option">XXL</label>
                         </div>
-                    `;
-                    
-                    const sizeOptions = sizeGroup.querySelectorAll('.size-option');
-                    sizeOptions.forEach(option => {
-                        option.addEventListener('click', function() {
-                            sizeOptions.forEach(opt => opt.classList.remove('active'));
-                            this.classList.add('active');
-                            sizeGroup.querySelector('input[type="hidden"]').value = this.textContent;
-                        });
-                        
-                        // Set default active state for M
-                        if (option.textContent === 'M') {
-                            option.classList.add('active');
-                        }
+                        <input type="hidden" name="size_${item.id}" value="M" required>
+                    </div>
+                `;
+
+                const sizeOptions = sizeGroup.querySelectorAll('.size-option');
+                sizeOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        sizeOptions.forEach(opt => opt.classList.remove('active'));
+                        this.classList.add('active');
+                        sizeGroup.querySelector('input[type="hidden"]').value = this.textContent;
                     });
-                    
-                    sizeSelection.appendChild(sizeGroup);
+
+                    if (option.textContent === 'M') {
+                        option.classList.add('active');
+                    }
                 });
-            }
+
+                sizeSelection.appendChild(sizeGroup);
+            });
+
+            // Delivery type change handler
+            const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');
+            deliveryRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const selectedDelivery = this.value;
+                    const deliveryCost = deliveryPrices[selectedDelivery] || 0;
+                    const grandTotal = subtotal + deliveryCost;
+
+                    deliveryCostSpan.textContent = `${deliveryCost.toFixed(2)}`;
+                    grandTotalSpan.textContent = `${grandTotal.toFixed(2)}`;
+                });
+            });
+
+            // Initialize with default (3-5 days)
+            const defaultDelivery = document.querySelector('input[name="delivery_type"]:checked').value;
+            const initialDeliveryCost = deliveryPrices[defaultDelivery] || 0;
+            deliveryCostSpan.textContent = `${initialDeliveryCost.toFixed(2)}`;
+            grandTotalSpan.textContent = `${(subtotal + initialDeliveryCost).toFixed(2)}`;
         });
     </script>
 </body>

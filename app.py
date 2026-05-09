@@ -11,6 +11,11 @@ from flask import (
 
 import os
 import json
+import pyotp
+import qrcode
+import io
+import base64
+import sqlite3
 
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -20,10 +25,96 @@ from flask_mail import Mail, Message
 # ADMIN AUTH
 # ==============================
 
-ADMIN_EMAIL = "admin@criyoyo.com"
-ADMIN_PASSWORD = "123456"  # change this later
+ADMIN_EMAIL = "codnellsmall@gmail.com"
+ADMIN_PASSWORD = "Cri123"  # change this later
 
 app = Flask(__name__)
+
+# ==============================
+# DATABASE
+# ==============================
+
+DATABASE = 'criyoyo.db'
+
+def get_db():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db()
+    c = conn.cursor()
+    
+    # Products table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            price REAL NOT NULL,
+            image TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Orders table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS orders (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_email TEXT NOT NULL,
+            shipping_address TEXT NOT NULL,
+            delivery_type TEXT NOT NULL,
+            delivery_cost REAL NOT NULL,
+            subtotal REAL NOT NULL,
+            total REAL NOT NULL,
+            status TEXT NOT NULL DEFAULT 'order placed',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Order items table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS order_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            product_name TEXT NOT NULL,
+            product_price REAL NOT NULL,
+            size TEXT NOT NULL,
+            FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Initialize database on startup
+init_db()
+
+# ==============================
+# 2FA STORAGE
+# ==============================
+
+TOTP_SECRET_FILE = "admin_totp_secret.txt"
+
+def get_totp_secret():
+    if os.path.exists(TOTP_SECRET_FILE):
+        with open(TOTP_SECRET_FILE, 'r') as f:
+            return f.read().strip()
+    secret = pyotp.random_base32()
+    with open(TOTP_SECRET_FILE, 'w') as f:
+        f.write(secret)
+    return secret
+
+def get_provisioning_uri():
+    secret = get_totp_secret()
+    return pyotp.totp.TOTP(secret).provisioning_uri(
+        name=ADMIN_EMAIL,
+        issuer_name="CRIYOYO Admin"
+    )
+
+def verify_totp(code):
+    secret = get_totp_secret()
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code, valid_window=1)
 
 # ==============================
 # SECURITY
@@ -73,18 +164,109 @@ app.config['MAIL_USERNAME'] = 'codnellsmall@gmail.com'
 
 # IMPORTANT:
 # Replace with your REAL Gmail App Password
-app.config['MAIL_PASSWORD'] = 'YOUR_APP_PASSWORD'
+app.config['MAIL_PASSWORD'] = 'rebe zhfq blgw yzih'
 
 app.config['MAIL_DEFAULT_SENDER'] = 'codnellsmall@gmail.com'
 
 mail = Mail(app)
 
+
+@app.context_processor
+def inject_cart_count():
+    cart_count = len(session.get('cart', []))
+    return dict(cart_count=cart_count)
+
+
 # ==============================
 # IN-MEMORY DATABASE
 # ==============================
 
-products = []
-orders = []
+# products = []
+# orders = []
+
+def get_all_products():
+    conn = get_db()
+    products = [dict(row) for row in conn.execute('SELECT * FROM products ORDER BY id DESC').fetchall()]
+    conn.close()
+    return products
+
+def get_product_by_id(product_id):
+    conn = get_db()
+    product = conn.execute('SELECT * FROM products WHERE id = ?', (product_id,)).fetchone()
+    conn.close()
+    return dict(product) if product else None
+
+def add_product(name, price, image):
+    conn = get_db()
+    conn.execute('INSERT INTO products (name, price, image) VALUES (?, ?, ?)', (name, price, image))
+    conn.commit()
+    product_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+    conn.close()
+    return product_id
+
+def delete_product(product_id):
+    conn = get_db()
+    # Get image path to delete file
+    product = conn.execute('SELECT image FROM products WHERE id = ?', (product_id,)).fetchone()
+    conn.execute('DELETE FROM products WHERE id = ?', (product_id,))
+    conn.commit()
+    conn.close()
+    return product['image'] if product else None
+
+def get_all_orders():
+    conn = get_db()
+    orders = []
+    for row in conn.execute('SELECT * FROM orders ORDER BY id DESC').fetchall():
+        order = dict(row)
+        # Get order items
+        items = conn.execute('SELECT product_name, product_price, size FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
+        order['items'] = [dict(item) for item in items]
+        orders.append(order)
+    conn.close()
+    return orders
+
+def get_order_by_id(order_id):
+    conn = get_db()
+    order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
+    if order:
+        order = dict(order)
+        items = conn.execute('SELECT product_name, product_price, size FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
+        order['items'] = [dict(item) for item in items]
+    conn.close()
+    return order
+
+def create_order(customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total, items):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO orders (customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'order placed')
+    ''', (customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total))
+    order_id = c.lastrowid
+    
+    # Insert order items
+    for item in items:
+        c.execute('''
+            INSERT INTO order_items (order_id, product_name, product_price, size)
+            VALUES (?, ?, ?, ?)
+        ''', (order_id, item['name'], item['price'], item['size']))
+    
+    conn.commit()
+    conn.close()
+    return order_id
+
+def update_order_status(order_id, new_status):
+    conn = get_db()
+    conn.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
+    conn.commit()
+    conn.close()
+
+def delete_order(order_id):
+    conn = get_db()
+    conn.execute('DELETE FROM order_items WHERE order_id = ?', (order_id,))
+    conn.execute('DELETE FROM orders WHERE id = ?', (order_id,))
+    conn.commit()
+    conn.close()
 
 # ==============================
 # COOKIE UTILITIES
@@ -192,6 +374,7 @@ def set_user_preferences(response, preferences):
 @app.route('/')
 def home():
 
+    products = get_all_products()
     latest_products = products[-3:]
 
     return render_template(
@@ -205,6 +388,7 @@ def home():
 
 @app.route('/shop')
 def shop():
+    products = get_all_products()
 
     return render_template(
         'shop.html',
@@ -222,15 +406,63 @@ def login():
         password = request.form.get('password')
 
         if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
-
-            session['admin_logged_in'] = True
-
-            return redirect(url_for('admin'))
-
+            session['admin_pass_valid'] = True
+            return redirect(url_for('verify_2fa'))
         else:
             error = "Invalid admin credentials"
 
     return render_template('login.html', error=error)
+
+# ==============================
+# 2FA VERIFICATION
+# ==============================
+
+@app.route('/verify-2fa', methods=['GET', 'POST'])
+def verify_2fa():
+
+    if not session.get('admin_pass_valid'):
+        return redirect(url_for('login'))
+
+    error = None
+
+    if request.method == 'POST':
+        code = request.form.get('code')
+
+        if verify_totp(code):
+            session['admin_logged_in'] = True
+            session.pop('admin_pass_valid', None)
+            return redirect(url_for('admin'))
+        else:
+            error = "Invalid authentication code"
+
+    return render_template('verify_2fa.html', error=error)
+
+# ==============================
+# 2FA SETUP
+# ==============================
+
+@app.route('/setup-2fa')
+def setup_2fa():
+
+    uri = get_provisioning_uri()
+    img = qrcode.make(uri)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    img_str = base64.b64encode(buf.getvalue()).decode()
+
+    return render_template('setup_2fa.html', qr_code=img_str, secret=get_totp_secret())
+
+# ==============================
+# LOGOUT
+# ==============================
+
+@app.route('/logout')
+def logout():
+
+    session.pop('admin_logged_in', None)
+    session.pop('admin_pass_valid', None)
+
+    return redirect(url_for('login'))
 
 # ==============================
 # ADMIN
@@ -245,34 +477,57 @@ def admin():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
+    # ==========================
+    # ADD PRODUCT
+    # ==========================
     if request.method == 'POST':
 
         name = request.form.get('name')
         price = request.form.get('price')
         image = request.files.get('image')
 
-        if not name or not price or not image:
-            return redirect(url_for('admin'))
+        if name and price and image:
+            filename = f"{datetime.now().timestamp()}_{secure_filename(image.filename)}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image.save(filepath)
 
-        filename = f"{datetime.now().timestamp()}_{secure_filename(image.filename)}"
+            add_product(
+                name=name,
+                price=float(price),
+                image='/' + filepath.replace("\\", "/")
+            )
 
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        return redirect(url_for('admin'))
 
-        image.save(filepath)
+    # ==========================
+    # DELETE PRODUCT
+    # ==========================
+    delete_id = request.args.get('delete')
+    if delete_id:
+        product = get_product_by_id(int(delete_id))
+        if product:
+            # Delete image file
+            image_path = product['image'].lstrip('/')
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except:
+                    pass
+            delete_product(int(delete_id))
+        return redirect(url_for('admin'))
 
-        products.append({
-            'id': len(products),
-            'name': name,
-            'price': float(price),
-            'image': '/' + filepath.replace("\\", "/")
-        })
-
+    # ==========================
+    # DELETE ORDER
+    # ==========================
+    delete_order_id = request.args.get('delete_order')
+    if delete_order_id:
+        delete_order(int(delete_order_id))
         return redirect(url_for('admin'))
 
     return render_template(
         'admin.html',
-        products=products,
-        orders=orders
+        products=get_all_products(),
+        orders=get_all_orders()
     )
 
 # ==============================
@@ -284,8 +539,8 @@ def admin_orders():
 
     return render_template(
         'admin.html',
-        products=products,
-        orders=orders
+        products=get_all_products(),
+        orders=get_all_orders()
     )
 
 # ==============================
@@ -296,44 +551,37 @@ def admin_orders():
 def update_order_status(order_id):
 
     new_status = request.form.get('status')
+    
+    update_order_status(order_id, new_status)
+    
+    # Get order for email notification
+    order = get_order_by_id(order_id)
+    
+    if order:
+        customer_email = order['customer_email']
+        
+        try:
+            msg = Message(
+                subject=f"Order #{order_id} Status Updated",
+                recipients=[customer_email]
+            )
+            
+            msg.body = f"""
+Your order status has been updated.
 
-    order = next(
-        (o for o in orders if o['id'] == order_id),
-        None
-    )
+Order ID: {order_id}
+Previous Status: {order['status']}
+New Status: {new_status}
 
-    if not order:
-        return redirect(url_for('admin_orders'))
+You can track your order in your account.
 
-    old_status = order['status']
-
-    order['status'] = new_status
-
-    customer_email = order['customer_email']
-
-    try:
-
-        msg = Message(
-            subject=f"Order #{order_id} Updated",
-            recipients=[customer_email]
-        )
-
-        msg.body = f"""
-Your order status has changed.
-
-Previous Status:
-{old_status}
-
-New Status:
-{new_status}
-
-Thank you for shopping with us.
+Thank you for shopping with CRIYOYO.
 """
-
-        mail.send(msg)
-
-    except Exception as e:
-        print("Email Error:", e)
+            
+            mail.send(msg)
+            
+        except Exception as e:
+            print("Email Error:", e)
 
     return redirect(url_for('admin_orders'))
 
@@ -365,6 +613,8 @@ def cart():
     cart_items = []
 
     total = 0
+
+    products = get_all_products()
 
     for product_id in session.get('cart', []):
 
@@ -425,10 +675,7 @@ def checkout():
 
         for product_id in session.get('cart', []):
 
-            product = next(
-                (p for p in products if p['id'] == product_id),
-                None
-            )
+            product = get_product_by_id(product_id)
 
             if product:
 
@@ -449,94 +696,145 @@ def checkout():
         return redirect(url_for('cart'))
 
     user_email = request.form.get('email')
+    shipping_address = request.form.get('address')
+    delivery_type = request.form.get('delivery_type')
 
-    if not user_email:
+    if not user_email or not shipping_address:
         return redirect(url_for('checkout'))
-
+    products = get_all_products()
     total = 0
     order_items = []
+    delivery_type = request.form.get('delivery_type', '3-5')
 
     for product_id in session.get('cart', []):
-
         product = next(
             (p for p in products if p['id'] == product_id),
             None
         )
 
         if product:
+            size_key = f'size_{product_id}'
+            size = request.form.get(size_key, 'N/A')
 
             total += product['price']
 
             order_items.append({
                 'name': product['name'],
-                'price': product['price']
+                'price': product['price'],
+                'size': size
             })
+
+    # PAXI courier pricing
+    delivery_prices = {
+        '3-5': 109.95,
+        '7-9': 59.95
+    }
+
+    delivery_cost = delivery_prices.get(delivery_type, 59.95)
+    grand_total = total + delivery_cost
 
     order = {
         'id': len(orders) + 1,
         'customer_email': user_email,
+        'shipping_address': shipping_address,
+        'delivery_type': delivery_type,
+        'delivery_cost': delivery_cost,
         'items': order_items,
-        'total': total,
+        'subtotal': total,
+        'total': grand_total,
         'status': 'Order Placed',
         'created_at': str(datetime.now())
     }
-
     orders.append(order)
-
     # ==========================
     # EMAIL ADMIN
     # ==========================
 
     try:
-
         admin_msg = Message(
-            subject=f"New Order #{order['id']}",
+            subject=f"New Order #{order['id']} - CRIYOYO",
             recipients=['codnellsmall@gmail.com']
         )
+
+        # Render HTML email template
+        admin_msg.html = render_template(
+            'emails/admin_new_order.html',
+            order=order
+        )
+
+        # Also add plain text fallback
+        items_text = '\n'.join([
+            f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
+            for item in order_items
+        ])
 
         admin_msg.body = f"""
 New Order Received
 
-Order ID:
-{order['id']}
+Order ID: {order['id']}
 
-Customer:
-{user_email}
-
-Total:
-R{total}
+Customer Email: {user_email}
+Delivery Address (PEP/Paxi): {shipping_address}
+Delivery Method: {'3-5 Business Days (Standard)' if delivery_type == '3-5' else '7-9 Business Days (Economy)'}
 
 Items:
-{', '.join([item['name'] for item in order_items])}
+{items_text}
+
+Subtotal: R{total:.2f}
+Delivery Cost: R{delivery_cost:.2f}
+Total: R{grand_total:.2f}
+
+Status: {order['status']}
 """
 
         mail.send(admin_msg)
 
     except Exception as e:
         print("Admin Email Error:", e)
-
+    except Exception as e:
+        print("Admin Email Error:", e)
     # ==========================
     # EMAIL CUSTOMER
     # ==========================
 
     try:
-
         user_msg = Message(
-            subject=f"Order Confirmation #{order['id']}",
+            subject=f"Order Confirmation #{order['id']} - CRIYOYO",
             recipients=[user_email]
         )
 
+        # Render HTML email template
+        user_msg.html = render_template(
+            'emails/customer_confirmation.html',
+            order=order
+        )
+
+        # Also add plain text fallback
+        items_text = '\n'.join([
+            f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
+            for item in order_items
+        ])
+
+        delivery_label = '3-5 Business Days (Standard)' if delivery_type == '3-5' else '7-9 Business Days (Economy)'
+
         user_msg.body = f"""
-Thank you for shopping with CRIYOYO.
+Thank you for shopping with CRIYOYO!
 
-Order Number:
-{order['id']}
+Order Number: {order['id']}
 
-Total:
-R{total}
+Delivery Address (PEP/Paxi):
+{shipping_address}
 
-Status:
-{order['status']}
+Delivery Method: {delivery_label}
+
+Items:
+{items_text}
+
+Subtotal: R{total:.2f}
+Delivery Cost: R{delivery_cost:.2f}
+Total: R{grand_total:.2f}
+
+Status: {order['status']}
 
 We will notify you when your order ships.
 """

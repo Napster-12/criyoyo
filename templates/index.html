@@ -83,6 +83,23 @@ body{
     padding:10px 16px;
     border-radius:6px;
     font-weight:600;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.cart-count{
+    background:#fff;
+    color:#000;
+    border-radius:50%;
+    width:18px;
+    height:18px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.7rem;
+    font-weight:700;
 }
 
 /* HAMBURGER */
@@ -177,6 +194,8 @@ body{
     border-radius:12px;
     overflow:hidden;
     transition:0.3s;
+    display:flex;
+    flex-direction:column;
 }
 
 .card:hover{
@@ -188,11 +207,15 @@ body{
 .card img{
     width:100%;
     height:260px;
-    object-fit:cover;
+    object-fit:contain;
+    background:#111;
 }
 
 .card-body{
     padding:18px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
 }
 
 .card h3{
@@ -216,6 +239,7 @@ body{
     font-weight:600;
     cursor:pointer;
     transition:0.3s;
+    margin-top:auto;
 }
 
 .add-btn:hover{
@@ -409,37 +433,7 @@ footer{
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-
-    <div class="container nav">
-
-        <a href="/" class="logo">CRIYOYO</a>
-
-        <!-- DESKTOP MENU -->
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/shop">Shop</a>
-            <a href="/contact">Contact</a>
-            <a href="/cart" class="cart-btn">🛒 Cart</a>
-        </div>
-
-        <!-- HAMBURGER -->
-        <div class="hamburger" onclick="toggleMenu()">
-            ☰
-        </div>
-
-    </div>
-
-    <!-- MOBILE MENU -->
-    <div class="container mobile-menu" id="mobileMenu">
-        <a href="/">Home</a>
-        <a href="/shop">Shop</a>
-        <a href="/contact">Contact</a>
-        <a href="/cart" class="cart-btn">🛒 Cart</a>
-    </div>
-
-</div>
+{% include 'partials/navbar.html' %}
 
 <!-- COOKIE BANNER -->
 <div id="cookie-banner">
