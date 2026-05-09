@@ -19,7 +19,9 @@ import sqlite3
 
 from datetime import datetime
 from werkzeug.utils import secure_filename
-from flask_mail import Mail, Message
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import os
 
 # ==============================
 # ADMIN AUTH
@@ -124,6 +126,23 @@ app.secret_key = os.environ.get(
     "SECRET_KEY",
     "1312"
 )
+
+def send_email_sendgrid(to_email, subject, content):
+
+    message = Mail(
+        from_email=os.environ.get('MAIL_DEFAULT_SENDER'),
+        to_emails=to_email,
+        subject=subject,
+        plain_text_content=content
+    )
+
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print("EMAIL SENT:", response.status_code)
+
+    except Exception as e:
+        print("SENDGRID ERROR:", e)
 
 # ==============================
 # COOKIE CONFIGURATION
