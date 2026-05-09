@@ -33,112 +33,6 @@ body{
     padding:0 20px;
 }
 
-/* NAVBAR */
-.navbar{
-    background:#000;
-    border-bottom:1px solid #111;
-    position:sticky;
-    top:0;
-    z-index:999;
-}
-
-.nav{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 0;
-}
-
-/* LOGO */
-.logo{
-    font-size:1.5rem;
-    font-weight:700;
-    color:#00ff88;
-    text-decoration:none;
-}
-
-/* LINKS (DESKTOP) */
-.nav-links{
-    display:flex;
-    gap:20px;
-}
-
-.nav-links a{
-    color:#fff;
-    text-decoration:none;
-    font-size:0.95rem;
-}
-
-.nav-links a:hover{
-    color:#00ff88;
-}
-
-/* CART */
-.cart{
-    color:#00ff88;
-    text-decoration:none;
-    font-weight:600;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-}
-
-.cart-count{
-    background:#fff;
-    color:#000;
-    border-radius:50%;
-    width:18px;
-    height:18px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:0.7rem;
-    font-weight:700;
-}
-
-.cart-btn{
-    background:#00ff88;
-    color:#000 !important;
-    padding:10px 16px;
-    border-radius:6px;
-    font-weight:600;
-    text-decoration:none;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-}
-
-.cart-btn .cart-count{
-    background:#fff;
-}
-
-/* HAMBURGER */
-.hamburger{
-    display:none;
-    font-size:1.8rem;
-    cursor:pointer;
-    color:#00ff88;
-}
-
-/* MOBILE MENU */
-.mobile-menu{
-    display:none;
-    flex-direction:column;
-    gap:15px;
-    padding:15px 0;
-    border-top:1px solid #111;
-}
-
-.mobile-menu a{
-    color:#fff;
-    text-decoration:none;
-    font-size:1.1rem;
-}
-
-.mobile-menu a:hover{
-    color:#00ff88;
-}
-
 /* HEADER */
 .header{
     padding:25px 0;
@@ -146,12 +40,6 @@ body{
 
 .header h1{
     font-size:2rem;
-    margin-bottom:10px;
-}
-
-.back{
-    color:#00ff88;
-    text-decoration:none;
 }
 
 /* GRID */
@@ -192,15 +80,10 @@ body{
     flex-direction:column;
 }
 
-.card h3{
-    font-size:1rem;
-    margin-bottom:8px;
-}
-
 .price{
     color:#00ff88;
     font-weight:600;
-    margin-bottom:12px;
+    margin:10px 0;
 }
 
 .btn{
@@ -215,25 +98,48 @@ body{
     margin-top:auto;
 }
 
+/* FLOATING CART */
+.floating-cart{
+    position:fixed;
+    bottom:25px;
+    right:20px;
+    background:#00ff88;
+    color:#000;
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.4rem;
+    text-decoration:none;
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
+    z-index:9999;
+    transition:0.3s;
+}
+
+.floating-cart:hover{
+    transform:scale(1.1);
+}
+
+.floating-cart .cart-count{
+    position:absolute;
+    top:5px;
+    right:5px;
+    background:#000;
+    color:#00ff88;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    font-size:0.75rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+}
+
 /* MOBILE */
 @media screen and (max-width:768px){
-
-    .nav-links,
-    .cart{
-        display:none;
-    }
-
-    .hamburger{
-        display:block;
-    }
-
-    .mobile-menu.active{
-        display:flex;
-    }
-
-    .header h1{
-        font-size:1.6rem;
-    }
 
     .grid{
         grid-template-columns:1fr;
@@ -241,6 +147,14 @@ body{
 
     .card img{
         height:200px;
+    }
+
+    .floating-cart{
+        width:55px;
+        height:55px;
+        bottom:15px;
+        right:15px;
+        font-size:1.2rem;
     }
 }
 
@@ -253,11 +167,7 @@ body{
 
 <!-- HEADER -->
 <div class="container header">
-
     <h1>Shop All Products</h1>
-
-   
-
 </div>
 
 <!-- PRODUCTS -->
@@ -291,12 +201,10 @@ body{
 
 </div>
 
-<!-- SCRIPT -->
-<script>
-function toggleMenu(){
-    document.getElementById("mobileMenu").classList.toggle("active");
-}
-</script>
+<!-- FLOATING CART -->
+<a href="/cart" class="floating-cart">
+    🛒 <span class="cart-count">{{ cart_count }}</span>
+</a>
 
 </body>
 </html>
