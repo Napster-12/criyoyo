@@ -22,7 +22,6 @@ from werkzeug.utils import secure_filename
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import os
-from flask_mail import Mail, Message
 # ==============================
 # ADMIN AUTH
 # ==============================
@@ -176,19 +175,26 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+def send_email_sendgrid(to_email, subject, content):
 
-app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False') == 'True'
+    message = Mail(
+        from_email=os.environ.get('MAIL_DEFAULT_SENDER'),
+        to_emails=to_email,
+        subject=subject,
+        html_content=content
+    )
 
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+    try:
+        sg = SendGridAPIClient(
+            os.environ.get('SENDGRID_API_KEY')
+        )
 
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get(
-    'MAIL_DEFAULT_SENDER',
-    app.config['MAIL_USERNAME']
-)
+        response = sg.send(message)
 
-mail = Mail(app)
+        print("EMAIL SENT:", response.status_code)
+
+    except Exception as e:
+        print("SENDGRID ERROR:", e)
 
 
 @app.context_processor
@@ -796,7 +802,19 @@ Delivery: R{delivery_cost:.2f}
 Total: R{grand_total:.2f}
 """
 
-        mail.send(admin_msg)
+        send_email_sendgrid(
+    "codnellsmall@gmail.com",
+    f"New Order #{order_id} - CRIYOYO",
+    f"""
+    <h1>NEW ORDER RECEIVED</h1>
+
+    <p><b>Order ID:</b> {order_id}</p>
+
+    <p><b>Customer:</b> {user_email}</p>
+
+    <p><b>Total:</b> R{grand_total:.2f}</p>
+    """
+))
 
     except Exception as e:
         print("ADMIN EMAIL ERROR:", e)
@@ -833,7 +851,19 @@ Total: R{grand_total:.2f}
 We will notify you when it ships.
 """
 
-        mail.send(user_msg)
+        send_email_sendgrid(
+    user_email,
+    f"Order Confirmation #{order_id}",
+    f"""
+    <h1>Thank you for your order!</h1>
+
+    <p>Your order was received successfully.</p>
+
+    <p><b>Order ID:</b> {order_id}</p>
+
+    <p>Total: R{grand_total:.2f}</p>
+    """
+        ))
 
     except Exception as e:
         print("CUSTOMER EMAIL ERROR:", e)
