@@ -11,17 +11,15 @@ from flask import (
 
 import os
 import json
+import sqlite3
 import pyotp
 import qrcode
 import io
 import base64
-import sqlite3
-
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-import os
 # ==============================
 # ADMIN AUTH
 # ==============================
@@ -126,22 +124,6 @@ app.secret_key = os.environ.get(
     "1312"
 )
 
-def send_email_sendgrid(to_email, subject, html_content):
-
-    message = Mail(
-        from_email=os.environ.get('MAIL_DEFAULT_SENDER', 'codnellsmall@gmail.com'),
-        to_emails=to_email,
-        subject=subject,
-        html_content=html_content
-    )
-
-    try:
-        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        response = sg.send(message)
-        print("EMAIL SENT:", response.status_code)
-
-    except Exception as e:
-        print("SENDGRID ERROR:", e)
 # ==============================
 # COOKIE CONFIGURATION
 # ==============================
@@ -167,33 +149,6 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# ==============================
-# MAIL CONFIGURATION (RENDER READY)
-# ==============================
-
-app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-def send_email_sendgrid(to_email, subject, content):
-
-    message = Mail(
-        from_email=os.environ.get('MAIL_DEFAULT_SENDER'),
-        to_emails=to_email,
-        subject=subject,
-        html_content=content
-    )
-
-    try:
-        sg = SendGridAPIClient(
-            os.environ.get('SENDGRID_API_KEY')
-        )
-
-        response = sg.send(message)
-
-        print("EMAIL SENT:", response.status_code)
-
-    except Exception as e:
-        print("SENDGRID ERROR:", e)
 
 
 @app.context_processor
@@ -595,7 +550,7 @@ def update_order_status_route(order_id):
                     <p><b>New Status:</b> {new_status}</p>
                     <p>Thank you for shopping with CRIYOYO.</p>
                 </div>
-                """
+                """.strip()
             )
 
         except Exception as e:
@@ -781,11 +736,11 @@ def checkout():
             (Size: {item['size']})
             - R{item['price']}
         </li>
-        """
+        """.strip()
         for item in order_items
     ])
 
-  # ==========================
+# ==========================
 # EMAIL ADMIN
 # ==========================
 try:
@@ -817,12 +772,13 @@ try:
     send_email_sendgrid(
         "codnellsmall@gmail.com",
         f"New Order #{order_id} - CRIYOYO",
-        admin_html
+        admin_html.strip()
     )
 
 except Exception as e:
     print("ADMIN EMAIL ERROR:", e)
-  # ==========================
+
+# ==========================
 # EMAIL CUSTOMER
 # ==========================
 try:
@@ -856,21 +812,21 @@ try:
     send_email_sendgrid(
         user_email,
         f"Order Confirmation #{order_id}",
-        customer_html
+        customer_html.strip()
     )
 
-    except Exception as e:
-        print("CUSTOMER EMAIL ERROR:", e)
+except Exception as e:
+    print("CUSTOMER EMAIL ERROR:", e)
 
-    # ==========================
-    # CLEAR CART
-    # ==========================
-    session.pop('cart', None)
+# ==========================
+# CLEAR CART
+# ==========================
+session.pop('cart', None)
 
-    return render_template(
-        'success.html',
-        order=order
-    )
+return render_template(
+    'success.html',
+    order=order
+)
 # ==============================
 # CONTACT PAGE
 # ==============================
@@ -899,7 +855,7 @@ def contact():
                         <p><b>Email:</b> {email}</p>
                         <p><b>Message:</b><br>{message}</p>
                     </div>
-                    """
+                    """.strip()
                 )
 
                 message_sent = True
