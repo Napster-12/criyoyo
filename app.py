@@ -29,6 +29,7 @@ ADMIN_EMAIL = "codnellsmall@gmail.com"
 ADMIN_PASSWORD = "Cri123"  # change this later
 
 app = Flask(__name__)
+orders = []
 
 # ==============================
 # DATABASE
