@@ -8,7 +8,22 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
         body{background:#000;color:#fff}
-        
+
+        /* NAVBAR */
+        .navbar{background:#000;border-bottom:1px solid #111;position:sticky;top:0;z-index:999;padding:0 20px}
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:15px 0;max-width:1200px;margin:auto}
+        .logo{font-size:1.5rem;font-weight:700;color:#00ff88;text-decoration:none}
+        .nav-links{display:flex;gap:20px;align-items:center}
+        .nav-links a{color:#fff;text-decoration:none;font-size:0.95rem;transition:0.3s}
+        .nav-links a:hover{color:#00ff88}
+        .cart-btn{background:#00ff88;color:#000 !important;padding:10px 16px;border-radius:6px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+        .cart-count{background:#fff;color:#000;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700}
+        .hamburger{display:none;font-size:1.8rem;cursor:pointer;color:#00ff88}
+        .mobile-menu{display:none;flex-direction:column;gap:15px;padding:15px 0;border-top:1px solid #111}
+        .mobile-menu a{color:#fff;text-decoration:none;font-size:1.05rem}
+        .mobile-menu a:hover{color:#00ff88}
+        .mobile-menu .cart-btn{width:100%;text-align:center}
+
         .container{max-width:800px;margin:auto;padding:20px}
         
         /* CHECKOUT FORM */
