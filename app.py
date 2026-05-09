@@ -29,7 +29,6 @@ ADMIN_EMAIL = "codnellsmall@gmail.com"
 ADMIN_PASSWORD = "Cri123"  # change this later
 
 app = Flask(__name__)
-orders = []
 
 # ==============================
 # DATABASE
@@ -257,12 +256,14 @@ def create_order(customer_email, shipping_address, delivery_type, delivery_cost,
     conn.close()
     return order_id
 
-def update_order_status(order_id, new_status):
+def update_order_status_db(order_id, new_status):
     conn = get_db()
-    conn.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
+    conn.execute(
+        'UPDATE orders SET status = ? WHERE id = ?',
+        (new_status, order_id)
+    )
     conn.commit()
     conn.close()
-
 def delete_order(order_id):
     conn = get_db()
     conn.execute('DELETE FROM order_items WHERE order_id = ?', (order_id,))
@@ -550,38 +551,30 @@ def admin_orders():
 # ==============================
 
 @app.route('/admin/order/<int:order_id>/status', methods=['POST'])
-def update_order_status(order_id):
+def update_order_status_route(order_id):
 
     new_status = request.form.get('status')
-    
-    update_order_status(order_id, new_status)
-    
-    # Get order for email notification
+
+    update_order_status_db(order_id, new_status)
+
     order = get_order_by_id(order_id)
-    
+
     if order:
-        customer_email = order['customer_email']
-        
         try:
             msg = Message(
                 subject=f"Order #{order_id} Status Updated",
-                recipients=[customer_email]
+                recipients=[order['customer_email']]
             )
-            
+
             msg.body = f"""
 Your order status has been updated.
 
 Order ID: {order_id}
-Previous Status: {order['status']}
 New Status: {new_status}
-
-You can track your order in your account.
-
-Thank you for shopping with CRIYOYO.
 """
-            
+
             mail.send(msg)
-            
+
         except Exception as e:
             print("Email Error:", e)
 
@@ -666,7 +659,6 @@ def checkout():
     # ==========================
     # SHOW CHECKOUT PAGE
     # ==========================
-
     if request.method == 'GET':
 
         if 'cart' not in session or len(session['cart']) == 0:
@@ -680,7 +672,6 @@ def checkout():
             product = get_product_by_id(product_id)
 
             if product:
-
                 cart_items.append(product)
                 total += product['price']
 
@@ -691,30 +682,29 @@ def checkout():
         )
 
     # ==========================
-    # PROCESS ORDER
+    # VALIDATE CART
     # ==========================
-
     if 'cart' not in session or len(session['cart']) == 0:
         return redirect(url_for('cart'))
 
     user_email = request.form.get('email')
     shipping_address = request.form.get('address')
-    delivery_type = request.form.get('delivery_type')
+    delivery_type = request.form.get('delivery_type', '3-5')
 
     if not user_email or not shipping_address:
         return redirect(url_for('checkout'))
+
     products = get_all_products()
+
     total = 0
     order_items = []
-    delivery_type = request.form.get('delivery_type', '3-5')
 
     for product_id in session.get('cart', []):
-        product = next(
-            (p for p in products if p['id'] == product_id),
-            None
-        )
+
+        product = next((p for p in products if p['id'] == product_id), None)
 
         if product:
+
             size_key = f'size_{product_id}'
             size = request.form.get(size_key, 'N/A')
 
@@ -726,7 +716,9 @@ def checkout():
                 'size': size
             })
 
-    # PAXI courier pricing
+    # ==========================
+    # DELIVERY PRICES
+    # ==========================
     delivery_prices = {
         '3-5': 109.95,
         '7-9': 59.95
@@ -735,121 +727,101 @@ def checkout():
     delivery_cost = delivery_prices.get(delivery_type, 59.95)
     grand_total = total + delivery_cost
 
-    order = {
-        'id': len(orders) + 1,
-        'customer_email': user_email,
-        'shipping_address': shipping_address,
-        'delivery_type': delivery_type,
-        'delivery_cost': delivery_cost,
-        'items': order_items,
-        'subtotal': total,
-        'total': grand_total,
-        'status': 'Order Placed',
-        'created_at': str(datetime.now())
-    }
-    orders.append(order)
     # ==========================
-    # EMAIL ADMIN
+    # SAVE ORDER TO DATABASE (FIXED)
     # ==========================
+    order_id = create_order(
+        customer_email=user_email,
+        shipping_address=shipping_address,
+        delivery_type=delivery_type,
+        delivery_cost=delivery_cost,
+        subtotal=total,
+        total=grand_total,
+        items=order_items
+    )
 
+    order = get_order_by_id(order_id)
+
+    # ==========================
+    # EMAIL ADMIN (SAFE VERSION)
+    # ==========================
     try:
         admin_msg = Message(
-            subject=f"New Order #{order['id']} - CRIYOYO",
+            subject=f"New Order #{order_id} - CRIYOYO",
             recipients=['codnellsmall@gmail.com']
         )
 
-        # Render HTML email template
-        admin_msg.html = render_template(
-            'emails/admin_new_order.html',
-            order=order
-        )
-
-        # Also add plain text fallback
         items_text = '\n'.join([
             f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
             for item in order_items
         ])
 
         admin_msg.body = f"""
-New Order Received
+NEW ORDER RECEIVED
 
-Order ID: {order['id']}
+Order ID: {order_id}
 
 Customer Email: {user_email}
-Delivery Address (PEP/Paxi): {shipping_address}
-Delivery Method: {'3-5 Business Days (Standard)' if delivery_type == '3-5' else '7-9 Business Days (Economy)'}
+
+Delivery Address:
+{shipping_address}
+
+Delivery Type:
+{delivery_type}
 
 Items:
 {items_text}
 
 Subtotal: R{total:.2f}
-Delivery Cost: R{delivery_cost:.2f}
+Delivery: R{delivery_cost:.2f}
 Total: R{grand_total:.2f}
-
-Status: {order['status']}
 """
 
         mail.send(admin_msg)
 
     except Exception as e:
-        print("Admin Email Error:", e)
-    except Exception as e:
-        print("Admin Email Error:", e)
-    # ==========================
-    # EMAIL CUSTOMER
-    # ==========================
+        print("ADMIN EMAIL ERROR:", e)
 
+    # ==========================
+    # EMAIL CUSTOMER (SAFE VERSION)
+    # ==========================
     try:
         user_msg = Message(
-            subject=f"Order Confirmation #{order['id']} - CRIYOYO",
+            subject=f"Order Confirmation #{order_id} - CRIYOYO",
             recipients=[user_email]
         )
 
-        # Render HTML email template
-        user_msg.html = render_template(
-            'emails/customer_confirmation.html',
-            order=order
-        )
-
-        # Also add plain text fallback
         items_text = '\n'.join([
             f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
             for item in order_items
         ])
 
-        delivery_label = '3-5 Business Days (Standard)' if delivery_type == '3-5' else '7-9 Business Days (Economy)'
-
         user_msg.body = f"""
-Thank you for shopping with CRIYOYO!
+Thank you for your order!
 
-Order Number: {order['id']}
+Order ID: {order_id}
 
-Delivery Address (PEP/Paxi):
+Delivery Address:
 {shipping_address}
-
-Delivery Method: {delivery_label}
 
 Items:
 {items_text}
 
 Subtotal: R{total:.2f}
-Delivery Cost: R{delivery_cost:.2f}
+Delivery: R{delivery_cost:.2f}
 Total: R{grand_total:.2f}
 
-Status: {order['status']}
-
-We will notify you when your order ships.
+We will notify you when it ships.
 """
 
         mail.send(user_msg)
 
     except Exception as e:
-        print("Customer Email Error:", e)
+        print("CUSTOMER EMAIL ERROR:", e)
 
     # ==========================
     # CLEAR CART
     # ==========================
-
     session.pop('cart', None)
 
     return render_template(
