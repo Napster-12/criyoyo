@@ -814,7 +814,7 @@ Total: R{grand_total:.2f}
 
     <p><b>Total:</b> R{grand_total:.2f}</p>
     """
-))
+)
 
     except Exception as e:
         print("ADMIN EMAIL ERROR:", e)
