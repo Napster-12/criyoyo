@@ -859,8 +859,9 @@ try:
         customer_html
     )
 
-except Exception as e:
-    print("CUSTOMER EMAIL ERROR:", e)
+    except Exception as e:
+        print("CUSTOMER EMAIL ERROR:", e)
+
     # ==========================
     # CLEAR CART
     # ==========================
