@@ -726,7 +726,10 @@ def checkout():
 
     for product_id in session.get('cart', []):
 
-        product = next((p for p in products if p['id'] == product_id), None)
+        product = next(
+            (p for p in products if p['id'] == product_id),
+            None
+        )
 
         if product:
 
@@ -749,11 +752,15 @@ def checkout():
         '7-9': 59.95
     }
 
-    delivery_cost = delivery_prices.get(delivery_type, 59.95)
+    delivery_cost = delivery_prices.get(
+        delivery_type,
+        59.95
+    )
+
     grand_total = total + delivery_cost
 
     # ==========================
-    # SAVE ORDER TO DATABASE (FIXED)
+    # SAVE ORDER
     # ==========================
     order_id = create_order(
         customer_email=user_email,
@@ -768,101 +775,104 @@ def checkout():
     order = get_order_by_id(order_id)
 
     # ==========================
-    # EMAIL ADMIN (SAFE VERSION)
+    # ITEMS TEXT
+    # ==========================
+    items_text = ''.join([
+        f"""
+        <li>
+            {item['name']}
+            (Size: {item['size']})
+            - R{item['price']}
+        </li>
+        """
+        for item in order_items
+    ])
+
+    # ==========================
+    # EMAIL ADMIN
     # ==========================
     try:
-        admin_msg = Message(
-            subject=f"New Order #{order_id} - CRIYOYO",
-            recipients=['codnellsmall@gmail.com']
-        )
 
-        items_text = '\n'.join([
-            f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
-            for item in order_items
-        ])
+        admin_html = f"""
+        <div style="font-family:Arial;padding:20px;background:#000;color:#fff;">
 
-        admin_msg.body = f"""
-NEW ORDER RECEIVED
+            <h1>NEW ORDER RECEIVED</h1>
 
-Order ID: {order_id}
+            <p><b>Order ID:</b> #{order_id}</p>
 
-Customer Email: {user_email}
+            <p><b>Customer Email:</b> {user_email}</p>
 
-Delivery Address:
-{shipping_address}
+            <p><b>Delivery Address:</b><br>{shipping_address}</p>
 
-Delivery Type:
-{delivery_type}
+            <p><b>Delivery Type:</b> {delivery_type}</p>
 
-Items:
-{items_text}
+            <h3>Items Ordered:</h3>
 
-Subtotal: R{total:.2f}
-Delivery: R{delivery_cost:.2f}
-Total: R{grand_total:.2f}
-"""
+            <ul>
+                {items_text}
+            </ul>
+
+            <hr>
+
+            <p><b>Subtotal:</b> R{total:.2f}</p>
+
+            <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
+
+            <h2>Total: R{grand_total:.2f}</h2>
+
+        </div>
+        """
 
         send_email_sendgrid(
-    "codnellsmall@gmail.com",
-    f"New Order #{order_id} - CRIYOYO",
-    f"""
-    <h1>NEW ORDER RECEIVED</h1>
-
-    <p><b>Order ID:</b> {order_id}</p>
-
-    <p><b>Customer:</b> {user_email}</p>
-
-    <p><b>Total:</b> R{grand_total:.2f}</p>
-    """
-)
+            "codnellsmall@gmail.com",
+            f"New Order #{order_id} - CRIYOYO",
+            admin_html
+        )
 
     except Exception as e:
         print("ADMIN EMAIL ERROR:", e)
 
     # ==========================
-    # EMAIL CUSTOMER (SAFE VERSION)
+    # EMAIL CUSTOMER
     # ==========================
     try:
-        user_msg = Message(
-            subject=f"Order Confirmation #{order_id} - CRIYOYO",
-            recipients=[user_email]
-        )
 
-        items_text = '\n'.join([
-            f"- {item['name']} (Size: {item['size']}) - R{item['price']}"
-            for item in order_items
-        ])
+        customer_html = f"""
+        <div style="font-family:Arial;padding:20px;background:#000;color:#fff;">
 
-        user_msg.body = f"""
-Thank you for your order!
+            <h1>Thank You For Your Order!</h1>
 
-Order ID: {order_id}
+            <p>Your order has been received successfully.</p>
 
-Delivery Address:
-{shipping_address}
+            <p><b>Order ID:</b> #{order_id}</p>
 
-Items:
-{items_text}
+            <p><b>Delivery Address:</b><br>{shipping_address}</p>
 
-Subtotal: R{total:.2f}
-Delivery: R{delivery_cost:.2f}
-Total: R{grand_total:.2f}
+            <h3>Your Items:</h3>
 
-We will notify you when it ships.
-"""
+            <ul>
+                {items_text}
+            </ul>
+
+            <hr>
+
+            <p><b>Subtotal:</b> R{total:.2f}</p>
+
+            <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
+
+            <h2>Total: R{grand_total:.2f}</h2>
+
+            <p>
+                We will notify you when your order status changes.
+            </p>
+
+        </div>
+        """
 
         send_email_sendgrid(
-    user_email,
-    f"Order Confirmation #{order_id}",
-    f"""
-    <h1>Thank you for your order!</h1>
-
-    <p>Your order was received successfully.</p>
-
-    <p><b>Order ID:</b> {order_id}</p>
-
-    <p>Total: R{grand_total:.2f}</p>
-    """
+            user_email,
+            f"Order Confirmation #{order_id} - CRIYOYO",
+            customer_html
         )
 
     except Exception as e:
