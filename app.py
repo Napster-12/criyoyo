@@ -126,13 +126,13 @@ app.secret_key = os.environ.get(
     "1312"
 )
 
-def send_email_sendgrid(to_email, subject, content):
+def send_email_sendgrid(to_email, subject, html_content):
 
     message = Mail(
-        from_email=os.environ.get('codnellsmall@gmail.com'),
+        from_email=os.environ.get('MAIL_DEFAULT_SENDER', 'codnellsmall@gmail.com'),
         to_emails=to_email,
         subject=subject,
-        plain_text_content=content
+        html_content=html_content
     )
 
     try:
@@ -142,7 +142,6 @@ def send_email_sendgrid(to_email, subject, content):
 
     except Exception as e:
         print("SENDGRID ERROR:", e)
-
 # ==============================
 # COOKIE CONFIGURATION
 # ==============================
@@ -586,25 +585,23 @@ def update_order_status_route(order_id):
 
     if order:
         try:
-            msg = Message(
-                subject=f"Order #{order_id} Status Updated",
-                recipients=[order['customer_email']]
+            send_email_sendgrid(
+                order['customer_email'],
+                f"Order #{order_id} Status Update",
+                f"""
+                <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
+                    <h1>Order Update</h1>
+                    <p><b>Order ID:</b> #{order_id}</p>
+                    <p><b>New Status:</b> {new_status}</p>
+                    <p>Thank you for shopping with CRIYOYO.</p>
+                </div>
+                """
             )
 
-            msg.body = f"""
-Your order status has been updated.
-
-Order ID: {order_id}
-New Status: {new_status}
-"""
-
-            mail.send(msg)
-
         except Exception as e:
-            print("Email Error:", e)
+            print("EMAIL ERROR:", e)
 
     return redirect(url_for('admin_orders'))
-
 # ==============================
 # ADD TO CART
 # ==============================
@@ -791,23 +788,21 @@ def checkout():
     # ==========================
     # EMAIL ADMIN
     # ==========================
-    try:
-
-        admin_html = f"""
-        <div style="font-family:Arial;padding:20px;background:#000;color:#fff;">
+  try:
+    send_email_sendgrid(
+        "codnellsmall@gmail.com",
+        f"New Order #{order_id} - CRIYOYO",
+        f"""
+        <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
 
             <h1>NEW ORDER RECEIVED</h1>
 
             <p><b>Order ID:</b> #{order_id}</p>
-
-            <p><b>Customer Email:</b> {user_email}</p>
-
-            <p><b>Delivery Address:</b><br>{shipping_address}</p>
-
+            <p><b>Customer:</b> {user_email}</p>
+            <p><b>Address:</b><br>{shipping_address}</p>
             <p><b>Delivery Type:</b> {delivery_type}</p>
 
-            <h3>Items Ordered:</h3>
-
+            <h3>Items:</h3>
             <ul>
                 {items_text}
             </ul>
@@ -815,40 +810,32 @@ def checkout():
             <hr>
 
             <p><b>Subtotal:</b> R{total:.2f}</p>
-
             <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
-
             <h2>Total: R{grand_total:.2f}</h2>
 
         </div>
         """
+    )
 
-        send_email_sendgrid(
-            "codnellsmall@gmail.com",
-            f"New Order #{order_id} - CRIYOYO",
-            admin_html
-        )
-
-    except Exception as e:
-        print("ADMIN EMAIL ERROR:", e)
-
+except Exception as e:
+    print("ADMIN EMAIL ERROR:", e)
     # ==========================
     # EMAIL CUSTOMER
     # ==========================
-    try:
+   try:
+    send_email_sendgrid(
+        user_email,
+        f"Order Confirmation #{order_id} - CRIYOYO",
+        f"""
+        <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
 
-        customer_html = f"""
-        <div style="font-family:Arial;padding:20px;background:#000;color:#fff;">
-
-            <h1>Thank You For Your Order!</h1>
-
-            <p>Your order has been received successfully.</p>
+            <h1>Thank You For Your Order</h1>
 
             <p><b>Order ID:</b> #{order_id}</p>
 
             <p><b>Delivery Address:</b><br>{shipping_address}</p>
 
-            <h3>Your Items:</h3>
+            <h3>Items:</h3>
 
             <ul>
                 {items_text}
@@ -857,27 +844,17 @@ def checkout():
             <hr>
 
             <p><b>Subtotal:</b> R{total:.2f}</p>
-
             <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
-
             <h2>Total: R{grand_total:.2f}</h2>
 
-            <p>
-                We will notify you when your order status changes.
-            </p>
+            <p>We will notify you when your order is shipped.</p>
 
         </div>
         """
+    )
 
-        send_email_sendgrid(
-            user_email,
-            f"Order Confirmation #{order_id} - CRIYOYO",
-            customer_html
-        )
-
-    except Exception as e:
-        print("CUSTOMER EMAIL ERROR:", e)
-
+except Exception as e:
+    print("CUSTOMER EMAIL ERROR:", e)
     # ==========================
     # CLEAR CART
     # ==========================
@@ -899,42 +876,31 @@ def contact():
     if request.method == 'POST':
 
         name = request.form.get('name')
-
         email = request.form.get('email')
-
         message = request.form.get('message')
 
         if name and email and message:
 
             try:
-
-                msg = Message(
-                    subject="New Contact Message",
-                    recipients=['codnellsmall@gmail.com']
+                send_email_sendgrid(
+                    "codnellsmall@gmail.com",
+                    "New Contact Message - CRIYOYO",
+                    f"""
+                    <div style="font-family:Arial;padding:20px">
+                        <h2>New Contact Message</h2>
+                        <p><b>Name:</b> {name}</p>
+                        <p><b>Email:</b> {email}</p>
+                        <p><b>Message:</b><br>{message}</p>
+                    </div>
+                    """
                 )
-
-                msg.body = f"""
-Name:
-{name}
-
-Email:
-{email}
-
-Message:
-{message}
-"""
-
-                mail.send(msg)
 
                 message_sent = True
 
             except Exception as e:
-                print("Contact Email Error:", e)
+                print("CONTACT EMAIL ERROR:", e)
 
-    return render_template(
-        'contact.html',
-        message_sent=message_sent
-    )
+    return render_template('contact.html', message_sent=message_sent)
 
 # ==============================
 # COOKIE ROUTES
