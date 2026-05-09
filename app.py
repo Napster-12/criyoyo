@@ -129,7 +129,7 @@ app.secret_key = os.environ.get(
 def send_email_sendgrid(to_email, subject, content):
 
     message = Mail(
-        from_email=os.environ.get('MAIL_DEFAULT_SENDER'),
+        from_email=os.environ.get('codnellsmall@gmail.com'),
         to_emails=to_email,
         subject=subject,
         plain_text_content=content
