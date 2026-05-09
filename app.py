@@ -785,72 +785,78 @@ def checkout():
         for item in order_items
     ])
 
-    # ==========================
-    # EMAIL ADMIN
-    # ==========================
-  try:
+  # ==========================
+# EMAIL ADMIN
+# ==========================
+try:
+
+    admin_html = f"""
+    <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
+
+        <h1>NEW ORDER RECEIVED</h1>
+
+        <p><b>Order ID:</b> #{order_id}</p>
+        <p><b>Customer Email:</b> {user_email}</p>
+        <p><b>Delivery Address:</b><br>{shipping_address}</p>
+        <p><b>Delivery Type:</b> {delivery_type}</p>
+
+        <h3>Items Ordered:</h3>
+        <ul>
+            {items_text}
+        </ul>
+
+        <hr>
+
+        <p><b>Subtotal:</b> R{total:.2f}</p>
+        <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
+        <h2>Total: R{grand_total:.2f}</h2>
+
+    </div>
+    """
+
     send_email_sendgrid(
         "codnellsmall@gmail.com",
         f"New Order #{order_id} - CRIYOYO",
-        f"""
-        <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
-
-            <h1>NEW ORDER RECEIVED</h1>
-
-            <p><b>Order ID:</b> #{order_id}</p>
-            <p><b>Customer:</b> {user_email}</p>
-            <p><b>Address:</b><br>{shipping_address}</p>
-            <p><b>Delivery Type:</b> {delivery_type}</p>
-
-            <h3>Items:</h3>
-            <ul>
-                {items_text}
-            </ul>
-
-            <hr>
-
-            <p><b>Subtotal:</b> R{total:.2f}</p>
-            <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
-            <h2>Total: R{grand_total:.2f}</h2>
-
-        </div>
-        """
+        admin_html
     )
 
 except Exception as e:
     print("ADMIN EMAIL ERROR:", e)
-    # ==========================
-    # EMAIL CUSTOMER
-    # ==========================
-   try:
+  # ==========================
+# EMAIL CUSTOMER
+# ==========================
+try:
+
+    customer_html = f"""
+    <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
+
+        <h1>Thank You For Your Order!</h1>
+
+        <p><b>Order ID:</b> #{order_id}</p>
+
+        <p><b>Delivery Address:</b><br>{shipping_address}</p>
+
+        <h3>Your Items:</h3>
+
+        <ul>
+            {items_text}
+        </ul>
+
+        <hr>
+
+        <p><b>Subtotal:</b> R{total:.2f}</p>
+        <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
+        <h2>Total: R{grand_total:.2f}</h2>
+
+        <p>We will notify you when your order is shipped.</p>
+
+    </div>
+    """
+
     send_email_sendgrid(
         user_email,
-        f"Order Confirmation #{order_id} - CRIYOYO",
-        f"""
-        <div style="font-family:Arial;padding:20px;background:#000;color:#fff">
-
-            <h1>Thank You For Your Order</h1>
-
-            <p><b>Order ID:</b> #{order_id}</p>
-
-            <p><b>Delivery Address:</b><br>{shipping_address}</p>
-
-            <h3>Items:</h3>
-
-            <ul>
-                {items_text}
-            </ul>
-
-            <hr>
-
-            <p><b>Subtotal:</b> R{total:.2f}</p>
-            <p><b>Delivery:</b> R{delivery_cost:.2f}</p>
-            <h2>Total: R{grand_total:.2f}</h2>
-
-            <p>We will notify you when your order is shipped.</p>
-
-        </div>
-        """
+        f"Order Confirmation #{order_id}",
+        customer_html
     )
 
 except Exception as e:
