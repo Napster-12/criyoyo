@@ -123,7 +123,7 @@ def verify_totp(code):
 
 app.secret_key = os.environ.get(
     "SECRET_KEY",
-    "change-this-secret-key"
+    "1312"
 )
 
 # ==============================
