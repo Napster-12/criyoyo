@@ -124,6 +124,22 @@ app.secret_key = os.environ.get(
     "1312"
 )
 
+def send_email_sendgrid(to_email, subject, html_content):
+    message = Mail(
+        from_email=os.environ.get('MAIL_DEFAULT_SENDER', 'codnellsmall@gmail.com'),
+        to_emails=to_email,
+        subject=subject,
+        html_content=html_content
+    )
+
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print("EMAIL SENT:", response.status_code)
+
+    except Exception as e:
+        print("SENDGRID ERROR:", e)
+
 # ==============================
 # COOKIE CONFIGURATION
 # ==============================
