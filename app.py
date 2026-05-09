@@ -22,7 +22,7 @@ from werkzeug.utils import secure_filename
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import os
-
+from flask_mail import Mail, Message
 # ==============================
 # ADMIN AUTH
 # ==============================
