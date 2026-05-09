@@ -368,6 +368,52 @@ footer{
     border:1px solid #444;
 }
 
+/* FLOATING CART */
+.floating-cart{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    z-index:1000;
+}
+
+.floating-cart a{
+    background:#00ff88;
+    color:#000;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.6rem;
+    text-decoration:none;
+    box-shadow:0 4px 15px rgba(0,255,136,0.4);
+    transition:0.3s;
+    position:relative;
+}
+
+.floating-cart a:hover{
+    transform:scale(1.1);
+    box-shadow:0 6px 20px rgba(0,255,136,0.6);
+}
+
+.floating-cart .cart-badge{
+    position:absolute;
+    top:-8px;
+    right:-8px;
+    background:#fff;
+    color:#000;
+    border-radius:50%;
+    width:22px;
+    height:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.7rem;
+    font-weight:700;
+    box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+
 /* MOBILE */
 @media screen and (max-width:768px){
 
@@ -425,6 +471,11 @@ footer{
     .cookie-buttons a{
         flex:1;
         text-align:center;
+    }
+
+    .floating-cart{
+        bottom:20px;
+        right:20px;
     }
 }
 
@@ -569,6 +620,16 @@ footer{
     </div>
 
 </section>
+
+<!-- FLOATING CART -->
+<div class="floating-cart">
+    <a href="/cart" title="Cart">
+        🛒
+        {% if cart_count > 0 %}
+        <span class="cart-badge">{{ cart_count }}</span>
+        {% endif %}
+    </a>
+</div>
 
 <!-- FOOTER -->
 <footer>
