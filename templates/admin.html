@@ -813,24 +813,28 @@
                     <div class="order-meta">
                         <strong>Customer:</strong> {{ order['customer_email'] }}
                         <span style="margin:0 10px">•</span>
+                        <strong>Phone:</strong> {{ order['phone'] }}
+                        <span style="margin:0 10px">•</span>
                         <strong>Delivery:</strong> PAXI {{ '3-5 Days' if order['delivery_type'] == '3-5' else '7-9 Days' }}
                         <span style="margin:0 10px">•</span>
-                        <strong>Items:</strong> {{ order['items']|length }}
+                        <strong>Items:</strong> {{ order['items']|sum(attribute='quantity') }} ({{ order['items']|length }} types)
                     </div>
 
-                    <div class="order-items">
-                        <ul>
-                            {% for item in order['items'] %}
-                            <li>
-                                <span class="item-name">
-                                    {{ item.name }}
-                                    <span class="item-size">Size: {{ item.size }}</span>
-                                </span>
-                                <span class="item-price">R{{ item.price }}</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                     <div class="order-items">
+                         <ul>
+                             {% for item in order['items'] %}
+                             <li>
+                                 <span class="item-name">
+                                     {{ item.product_name }}
+                                     <span class="item-size">Size: {{ item.size }}</span>
+                                     <span class="item-size">Color: {{ item.color }}</span>
+                                     <span class="item-size">Qty: {{ item.quantity }}</span>
+                                 </span>
+                                 <span class="item-price">R{{ "%.2f"|format(item.product_price * item.quantity) }}</span>
+                             </li>
+                             {% endfor %}
+                         </ul>
+                     </div>
 
                     <form method="POST"
                           action="/admin/order/{{ order['id'] }}/status"

@@ -60,6 +60,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             customer_email TEXT NOT NULL,
+            phone TEXT NOT NULL,
             shipping_address TEXT NOT NULL,
             delivery_type TEXT NOT NULL,
             delivery_cost REAL NOT NULL,
@@ -70,6 +71,16 @@ def init_db():
         )
     ''')
     
+    # Check if phone column exists, add if missing (migration)
+    cursor = conn.execute('PRAGMA table_info(orders)')
+    columns = [row[1] for row in cursor.fetchall()]
+    if 'phone' not in columns:
+        try:
+            conn.execute('ALTER TABLE orders ADD COLUMN phone TEXT')
+            print("MIGRATION: Added 'phone' column to orders table")
+        except Exception as e:
+            print("MIGRATION ERROR:", e)
+    
     # Order items table
     c.execute('''
         CREATE TABLE IF NOT EXISTS order_items (
@@ -78,9 +89,27 @@ def init_db():
             product_name TEXT NOT NULL,
             product_price REAL NOT NULL,
             size TEXT NOT NULL,
+            color TEXT,
+            quantity INTEGER NOT NULL DEFAULT 1,
             FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE
         )
     ''')
+    
+    # Check if color column exists, add if missing (migration)
+    cursor = conn.execute('PRAGMA table_info(order_items)')
+    columns = [row[1] for row in cursor.fetchall()]
+    if 'color' not in columns:
+        try:
+            conn.execute('ALTER TABLE order_items ADD COLUMN color TEXT')
+            print("MIGRATION: Added 'color' column to order_items table")
+        except Exception as e:
+            print("MIGRATION ERROR:", e)
+    if 'quantity' not in columns:
+        try:
+            conn.execute('ALTER TABLE order_items ADD COLUMN quantity INTEGER DEFAULT 1')
+            print("MIGRATION: Added 'quantity' column to order_items table")
+        except Exception as e:
+            print("MIGRATION ERROR:", e)
     
     conn.commit()
     conn.close()
@@ -169,7 +198,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.context_processor
 def inject_cart_count():
-    cart_count = len(session.get('cart', []))
+    cart = session.get('cart', [])
+    if cart and isinstance(cart[0], dict):
+        cart_count = sum(item.get('quantity', 1) for item in cart)
+    else:
+        cart_count = len(cart)
     return dict(cart_count=cart_count)
 
 
@@ -215,7 +248,7 @@ def get_all_orders():
     for row in conn.execute('SELECT * FROM orders ORDER BY id DESC').fetchall():
         order = dict(row)
         # Get order items
-        items = conn.execute('SELECT product_name, product_price, size FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
+        items = conn.execute('SELECT product_name, product_price, size, color, quantity FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
         order['items'] = [dict(item) for item in items]
         orders.append(order)
     conn.close()
@@ -226,26 +259,26 @@ def get_order_by_id(order_id):
     order = conn.execute('SELECT * FROM orders WHERE id = ?', (order_id,)).fetchone()
     if order:
         order = dict(order)
-        items = conn.execute('SELECT product_name, product_price, size FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
+        items = conn.execute('SELECT product_name, product_price, size, color, quantity FROM order_items WHERE order_id = ?', (order['id'],)).fetchall()
         order['items'] = [dict(item) for item in items]
     conn.close()
     return order
 
-def create_order(customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total, items):
+def create_order(customer_email, phone, shipping_address, delivery_type, delivery_cost, subtotal, total, items):
     conn = get_db()
     c = conn.cursor()
     c.execute('''
-        INSERT INTO orders (customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total, status)
-        VALUES (?, ?, ?, ?, ?, ?, 'order placed')
-    ''', (customer_email, shipping_address, delivery_type, delivery_cost, subtotal, total))
+        INSERT INTO orders (customer_email, phone, shipping_address, delivery_type, delivery_cost, subtotal, total, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'order placed')
+    ''', (customer_email, phone, shipping_address, delivery_type, delivery_cost, subtotal, total))
     order_id = c.lastrowid
     
     # Insert order items
     for item in items:
         c.execute('''
-            INSERT INTO order_items (order_id, product_name, product_price, size)
-            VALUES (?, ?, ?, ?)
-        ''', (order_id, item['name'], item['price'], item['size']))
+            INSERT INTO order_items (order_id, product_name, product_price, size, color, quantity)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (order_id, item['name'], item['price'], item['size'], item.get('color', 'N/A'), item.get('quantity', 1)))
     
     conn.commit()
     conn.close()
@@ -582,8 +615,23 @@ def add_to_cart(id):
 
     session.setdefault('cart', [])
 
-    if id not in session['cart']:
-        session['cart'].append(id)
+    # Convert legacy cart (list of IDs) to new format (list of dicts)
+    if session['cart'] and isinstance(session['cart'][0], int):
+        new_cart = []
+        for pid in session['cart']:
+            existing = next((item for item in new_cart if item['product_id'] == pid), None)
+            if existing:
+                existing['quantity'] += 1
+            else:
+                new_cart.append({'product_id': pid, 'quantity': 1})
+        session['cart'] = new_cart
+
+    # Check if product already in cart
+    existing_item = next((item for item in session['cart'] if item['product_id'] == id), None)
+    if existing_item:
+        existing_item['quantity'] += 1
+    else:
+        session['cart'].append({'product_id': id, 'quantity': 1})
 
     session.modified = True
 
@@ -599,29 +647,63 @@ def add_to_cart(id):
 def cart():
 
     cart_items = []
-
     total = 0
-
     products = get_all_products()
 
-    for product_id in session.get('cart', []):
+    for cart_entry in session.get('cart', []):
+        product_id = cart_entry['product_id'] if isinstance(cart_entry, dict) else cart_entry
+        quantity = cart_entry['quantity'] if isinstance(cart_entry, dict) else 1
 
         product = next(
             (p for p in products if p['id'] == product_id),
             None
         )
 
-        if product:
+        if not product:
+            # Placeholder for missing product (deleted from DB)
+            product = {
+                'id': product_id,
+                'name': 'Product Not Found',
+                'price': 0,
+                'image': ''
+            }
 
-            cart_items.append(product)
-
-            total += product['price']
+        cart_items.append({
+            'product': product,
+            'quantity': quantity,
+            'subtotal': product['price'] * quantity
+        })
+        total += product['price'] * quantity
 
     return render_template(
         'cart.html',
         items=cart_items,
         total=total
     )
+
+# ==============================
+# UPDATE QUANTITY
+# ==============================
+
+@app.route('/update_quantity/<int:product_id>', methods=['POST'])
+def update_quantity(product_id):
+
+    change = request.form.get('change')
+
+    if 'cart' in session:
+        # Find item
+        item = next((item for item in session['cart'] if isinstance(item, dict) and item.get('product_id') == product_id), None)
+        if item:
+            if change == 'increase':
+                item['quantity'] += 1
+            elif change == 'decrease':
+                item['quantity'] -= 1
+                if item['quantity'] <= 0:
+                    session['cart'].remove(item)
+
+            session.modified = True
+
+    return redirect(url_for('cart'))
 
 # ==============================
 # REMOVE FROM CART
@@ -660,13 +742,15 @@ def checkout():
         cart_items = []
         total = 0
 
-        for product_id in session.get('cart', []):
+        for cart_entry in session.get('cart', []):
+            product_id = cart_entry['product_id'] if isinstance(cart_entry, dict) else cart_entry
+            quantity = cart_entry['quantity'] if isinstance(cart_entry, dict) else 1
 
             product = get_product_by_id(product_id)
 
             if product:
                 cart_items.append(product)
-                total += product['price']
+                total += product['price'] * quantity
 
         return render_template(
             'checkout.html',
@@ -681,10 +765,11 @@ def checkout():
         return redirect(url_for('cart'))
 
     user_email = request.form.get('email')
+    phone = request.form.get('phone')
     shipping_address = request.form.get('address')
     delivery_type = request.form.get('delivery_type', '3-5')
 
-    if not user_email or not shipping_address:
+    if not user_email or not phone or not shipping_address:
         return redirect(url_for('checkout'))
 
     products = get_all_products()
@@ -692,7 +777,10 @@ def checkout():
     total = 0
     order_items = []
 
-    for product_id in session.get('cart', []):
+    for cart_entry in session.get('cart', []):
+
+        product_id = cart_entry['product_id'] if isinstance(cart_entry, dict) else cart_entry
+        quantity = cart_entry['quantity'] if isinstance(cart_entry, dict) else 1
 
         product = next(
             (p for p in products if p['id'] == product_id),
@@ -702,14 +790,18 @@ def checkout():
         if product:
 
             size_key = f'size_{product_id}'
+            color_key = f'color_{product_id}'
             size = request.form.get(size_key, 'N/A')
+            color = request.form.get(color_key, 'N/A')
 
-            total += product['price']
+            total += product['price'] * quantity
 
             order_items.append({
                 'name': product['name'],
                 'price': product['price'],
-                'size': size
+                'size': size,
+                'color': color,
+                'quantity': quantity
             })
 
     # ==========================
@@ -732,6 +824,7 @@ def checkout():
     # ==========================
     order_id = create_order(
         customer_email=user_email,
+        phone=phone,
         shipping_address=shipping_address,
         delivery_type=delivery_type,
         delivery_cost=delivery_cost,
@@ -748,9 +841,8 @@ def checkout():
     items_text = ''.join([
         f"""
         <li>
-            {item['name']}
-            (Size: {item['size']})
-            - R{item['price']}
+            {item['name']} (Color: {item.get('color', 'N/A')}, Size: {item['size']}) x {item.get('quantity', 1)}
+            - R{item['price'] * item.get('quantity', 1):.2f}
         </li>
         """.strip()
         for item in order_items
@@ -768,6 +860,7 @@ def checkout():
 
             <p><b>Order ID:</b> #{order_id}</p>
             <p><b>Customer Email:</b> {user_email}</p>
+            <p><b>Phone:</b> {phone}</p>
             <p><b>Delivery Address:</b><br>{shipping_address}</p>
             <p><b>Delivery Type:</b> {delivery_type}</p>
 
@@ -806,6 +899,7 @@ def checkout():
 
             <p><b>Order ID:</b> #{order_id}</p>
 
+            <p><b>Phone:</b> {phone}</p>
             <p><b>Delivery Address:</b><br>{shipping_address}</p>
 
             <h3>Your Items:</h3>

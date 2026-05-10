@@ -43,8 +43,8 @@
         <div class="order-items">
             {% for item in order['items'] %}
             <div class="order-item">
-                <span class="item-name">{{ item.name }} (Size: {{ item.size }})</span>
-                <span class="item-price">R{{ item.price }}</span>
+                <span class="item-name">{{ item.product_name }} (Size: {{ item.size }}, Color: {{ item.color }}) x {{ item.quantity }}</span>
+                <span class="item-price">R{{ "%.2f"|format(item.product_price * item.quantity) }}</span>
             </div>
             {% endfor %}
         </div>
@@ -67,6 +67,11 @@
         <div class="order-row">
             <span class="order-label">Delivery To</span>
             <span class="order-value">{{ order['shipping_address'] }}</span>
+        </div>
+
+        <div class="order-row">
+            <span class="order-label">Phone</span>
+            <span class="order-value">{{ order['phone'] }}</span>
         </div>
 
             <div class="delivery-note">

@@ -42,16 +42,26 @@
         .form-group textarea:focus{
             outline:none;border-color:#00ff88;box-shadow:0 0 5px rgba(0,255,136,0.3)
         }
-        .size-options{display:flex;gap:15px;margin-top:10px}
-        .size-option{
-            flex:1;padding:12px;background:#111;border:1px solid #333;
-            border-radius:5px;color:#fff;text-align:center;
-            cursor:pointer;transition:0.3s
-        }
-        .size-option:hover{border-color:#00ff88;background:#1a1a1a}
-        .size-option.active{
-            border-color:#00ff88;background:#00ff88;color:#000
-        }
+         .size-options{display:flex;gap:15px;margin-top:10px}
+         .size-option{
+             flex:1;padding:12px;background:#111;border:1px solid #333;
+             border-radius:5px;color:#fff;text-align:center;
+             cursor:pointer;transition:0.3s
+         }
+         .size-option:hover{border-color:#00ff88;background:#1a1a1a}
+         .size-option.active{
+             border-color:#00ff88;background:#00ff88;color:#000
+         }
+         .color-options{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+         .color-option{
+             padding:10px 18px;background:#111;border:1px solid #333;
+             border-radius:5px;color:#fff;cursor:pointer;transition:0.3s;
+             min-width:60px;text-align:center
+         }
+         .color-option:hover{border-color:#00ff88;background:#1a1a1a}
+         .color-option.active{
+             border-color:#00ff88;background:#00ff88;color:#000
+         }
         .delivery-options{display:flex;flex-direction:column;gap:10px;margin-top:10px}
         .delivery-option{
             padding:15px;background:#111;border:1px solid #333;
@@ -99,12 +109,17 @@
         <div class="checkout-form">
             <h2>Checkout</h2>
             <form method="POST" action="/checkout">
-                <!-- Customer Information -->
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                
+                 <!-- Customer Information -->
+                 <div class="form-group">
+                     <label for="email">Email Address *</label>
+                     <input type="email" id="email" name="email" required>
+                 </div>
+                 
+                 <div class="form-group">
+                     <label for="phone">Phone Number *</label>
+                     <input type="tel" id="phone" name="phone" required placeholder="+27 12 345 6789">
+                 </div>
+                 
                  <div class="form-group">
                      <label for="address">PEP Paxi Drop-off Point Address *</label>
                      <textarea id="address" name="address" rows="3" required placeholder="Enter the PEP store or Paxi drop-off point address (we deliver to your selected PEP/Paxi location)"></textarea>
@@ -180,42 +195,66 @@
 
             const subtotal = {{ total }};
 
-            const sizeSelection = document.getElementById('size-selection');
-            const deliveryCostSpan = document.getElementById('delivery-cost');
-            const grandTotalSpan = document.getElementById('grand-total');
+                 const sizeSelection = document.getElementById('size-selection');
+                 const deliveryCostSpan = document.getElementById('delivery-cost');
+                 const grandTotalSpan = document.getElementById('grand-total');
 
-            // Generate size selection for each item
-            cartItems.forEach((item) => {
-                const sizeGroup = document.createElement('div');
-                sizeGroup.innerHTML = `
-                    <div class="form-group">
-                        <label>${item.name} Size:</label>
-                        <div class="size-options">
-                            <label class="size-option">S</label>
-                            <label class="size-option">M</label>
-                            <label class="size-option">L</label>
-                            <label class="size-option">XL</label>
-                            <label class="size-option">XXL</label>
-                        </div>
-                        <input type="hidden" name="size_${item.id}" value="M" required>
-                    </div>
-                `;
+                 // Generate size and color selection for each item
+                 cartItems.forEach((item) => {
+                     const itemGroup = document.createElement('div');
+                     itemGroup.innerHTML = `
+                         <div class="form-group">
+                             <label>${item.name} Size:</label>
+                             <div class="size-options">
+                                 <label class="size-option">S</label>
+                                 <label class="size-option">M</label>
+                                 <label class="size-option">L</label>
+                                 <label class="size-option">XL</label>
+                                 <label class="size-option">XXL</label>
+                             </div>
+                             <input type="hidden" name="size_${item.id}" value="M" required>
+                         </div>
+                         
+                         <div class="form-group">
+                             <label>${item.name} Color:</label>
+                             <div class="color-options">
+                                 <label class="color-option" data-color="Black">Black</label>
+                                 <label class="color-option" data-color="White">White</label>
+                                 <label class="color-option" data-color="Navy">Navy</label>
+                                 <label class="color-option" data-color="Gray">Gray</label>
+                             </div>
+                             <input type="hidden" name="color_${item.id}" value="Black" required>
+                         </div>
+                     `;
 
-                const sizeOptions = sizeGroup.querySelectorAll('.size-option');
-                sizeOptions.forEach(option => {
-                    option.addEventListener('click', function() {
-                        sizeOptions.forEach(opt => opt.classList.remove('active'));
-                        this.classList.add('active');
-                        sizeGroup.querySelector('input[type="hidden"]').value = this.textContent;
-                    });
+                      const sizeOptions = itemGroup.querySelectorAll('.size-option');
+                      sizeOptions.forEach(option => {
+                          option.addEventListener('click', function() {
+                              sizeOptions.forEach(opt => opt.classList.remove('active'));
+                              this.classList.add('active');
+                              itemGroup.querySelector(`input[type="hidden"][name="size_${item.id}"]`).value = this.textContent;
+                          });
 
-                    if (option.textContent === 'M') {
-                        option.classList.add('active');
-                    }
-                });
+                          if (option.textContent === 'M') {
+                              option.classList.add('active');
+                          }
+                      });
 
-                sizeSelection.appendChild(sizeGroup);
-            });
+                      const colorOptions = itemGroup.querySelectorAll('.color-option');
+                      colorOptions.forEach(option => {
+                          option.addEventListener('click', function() {
+                              colorOptions.forEach(opt => opt.classList.remove('active'));
+                              this.classList.add('active');
+                              itemGroup.querySelector(`input[type="hidden"][name="color_${item.id}"]`).value = this.getAttribute('data-color');
+                          });
+
+                          if (option.getAttribute('data-color') === 'Black') {
+                              option.classList.add('active');
+                          }
+                      });
+
+                     sizeSelection.appendChild(itemGroup);
+                 });
 
             // Delivery type change handler
             const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');

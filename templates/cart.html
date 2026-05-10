@@ -84,15 +84,6 @@ body{
     padding:10px 16px;
     border-radius:6px;
     font-weight:600;
-}
-
-/* CART BUTTON */
-.cart-btn{
-    background:#00ff88;
-    color:#000 !important;
-    padding:10px 16px;
-    border-radius:6px;
-    font-weight:600;
     text-decoration:none;
     display:inline-flex;
     align-items:center;
@@ -206,6 +197,47 @@ body{
     color:#00ff88;
     font-weight:600;
     font-size:1rem;
+}
+
+/* QUANTITY CONTROLS */
+.quantity-controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:10px 0;
+}
+
+.quantity-btn{
+    width:32px;
+    height:32px;
+    border-radius:6px;
+    border:1px solid #333;
+    background:#111;
+    color:#fff;
+    cursor:pointer;
+    font-size:1.2rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.3s;
+}
+
+.quantity-btn:hover{
+    border-color:#00ff88;
+    background:#1a1a1a;
+}
+
+.quantity-display{
+    min-width:30px;
+    text-align:center;
+    font-weight:600;
+    font-size:1.1rem;
+}
+
+.item-subtotal{
+    color:#00ff88;
+    font-weight:600;
+    font-size:1.05rem;
 }
 
 /* REMOVE BUTTON */
@@ -327,6 +359,12 @@ footer{
         height:240px;
     }
 
+    .quantity-controls{
+        width:100%;
+        justify-content:space-between;
+        margin:15px 0;
+    }
+
     .remove-btn{
         width:100%;
     }
@@ -364,13 +402,25 @@ footer{
 
             {% for item in items %}
 
-            <div class="cart-item">
+            <div class="cart-item" data-product-id="{{ item.product.id }}">
 
-                <img src="{{ item.image }}" alt="{{ item.name }}">
+                <img src="{{ item.product.image }}" alt="{{ item.product.name }}">
 
                 <div class="item-details">
-                    <h3>{{ item.name }}</h3>
-                    <p class="price">R{{ item.price }}</p>
+                    <h3>{{ item.product.name }}</h3>
+                    <p class="price">R{{ item.product.price }}</p>
+
+                    <div class="quantity-controls">
+                        <form action="/update_quantity/{{ item.product.id }}" method="POST" style="display: inline;">
+                            <button type="submit" name="change" value="decrease" class="quantity-btn">−</button>
+                        </form>
+                        <span class="quantity-display">{{ item.quantity }}</span>
+                        <form action="/update_quantity/{{ item.product.id }}" method="POST" style="display: inline;">
+                            <button type="submit" name="change" value="increase" class="quantity-btn">+</button>
+                        </form>
+                    </div>
+
+                    <p class="item-subtotal">Subtotal: R{{ item.subtotal|round(2) }}</p>
                 </div>
 
                 <div class="remove-btn">
@@ -390,7 +440,7 @@ footer{
             <!-- Total -->
             <div class="total-box">
 
-                <h2>Total: R{{ total }}</h2>
+                <h2>Total: R{{ total|round(2) }}</h2>
 
                 <a href="/checkout" style="text-decoration: none;">
                     <button type="button" class="checkout-btn">
